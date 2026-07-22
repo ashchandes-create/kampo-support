@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#2b5f8a">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="漢方サポート">
+<title>漢方外来サポート｜症状からの漢方薬選択支援</title>
+<style>
+  :root{
+    --accent:#2b5f8a; --accent-dark:#1d4463; --accent-light:#e8f0f7;
+    --bg:#f4f6f9; --card:#ffffff; --text:#1f2a36; --sub:#5a6b7c;
+    --line:#dde4ec; --danger:#c0392b; --danger-bg:#fdeeec;
+    --warn:#9a6b00; --warn-bg:#fdf6e3; --ok:#1e7a4f; --ok-bg:#e9f6ef;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
+       background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;
+       padding-bottom:calc(76px + env(safe-area-inset-bottom));}
+  header{background:var(--accent);color:#fff;padding:12px 16px 0;position:sticky;top:0;z-index:20;
+         box-shadow:0 2px 6px rgba(0,0,0,.15);}
+  header h1{font-size:18px;font-weight:700;letter-spacing:.02em}
+  header p{font-size:11.5px;opacity:.85;margin-top:2px}
+  .tabs{display:flex;gap:4px;margin-top:8px}
+  .tabs button{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px 8px 0 0;
+      padding:8px 16px;font-size:13.5px;font-weight:700;cursor:pointer;opacity:.75}
+  .tabs button.active{background:var(--bg);color:var(--accent-dark);opacity:1}
+  main{max-width:860px;margin:0 auto;padding:14px 12px 20px}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:14px 14px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,40,60,.05)}
+  .card h2{font-size:15px;color:var(--accent-dark);border-left:4px solid var(--accent);
+           padding-left:8px;margin-bottom:10px;letter-spacing:.02em}
+  .card h2 small{font-weight:400;color:var(--sub);font-size:11.5px;margin-left:6px}
+
+  /* 基本情報 */
+  .basic{display:flex;flex-wrap:wrap;gap:10px}
+  .basic .field{flex:1 1 120px}
+  .basic label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
+  .basic input[type=number]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
+        font-size:16px;background:#fff;color:var(--text)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg label{flex:1;margin:0}
+  .seg input{display:none}
+  .seg span{display:block;text-align:center;padding:10px 4px;font-size:14px;cursor:pointer;
+            background:#fff;color:var(--sub);border-right:1px solid var(--line);user-select:none}
+  .seg label:last-child span{border-right:none}
+  .seg input:checked + span{background:var(--accent);color:#fff;font-weight:700}
+
+  /* チェックボックス群 */
+  .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+  .chip{position:relative;user-select:none}
+  .chip input{position:absolute;opacity:0;pointer-events:none}
+  .chip span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;
+      padding:8px 6px;border:1.5px solid var(--line);border-radius:10px;background:#fff;
+      font-size:13.5px;cursor:pointer;transition:all .12s;color:var(--text)}
+  .chip input:checked + span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+  .chips.bgchips .chip input:checked + span{background:var(--danger);border-color:var(--danger)}
+
+  /* 下部固定バー */
+  .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);
+      border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+      display:flex;gap:10px;max-width:100%;backdrop-filter:blur(6px)}
+  .bottombar .inner{display:flex;gap:10px;width:100%;max-width:860px;margin:0 auto}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-size:15px}
+  #resetBtn{flex:1;background:#fff;border:1.5px solid var(--line);color:var(--sub);padding:13px 0;font-weight:700}
+  #showBtn{flex:2.2;background:var(--accent);color:#fff;padding:13px 0;font-weight:700;
+           box-shadow:0 2px 8px rgba(43,95,138,.35)}
+  #showBtn:active{background:var(--accent-dark)}
+  .selcount{font-size:12px;color:var(--sub);text-align:right;margin-top:6px}
+
+  /* 結果 */
+  #result{display:none}
+  .backlink{display:inline-block;margin-bottom:10px;color:var(--accent);font-size:13.5px;
+            background:none;border:none;font-weight:700;padding:6px 2px}
+  .rescard{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:16px;
+           overflow:hidden;box-shadow:0 2px 8px rgba(20,40,60,.07)}
+  .reshead{padding:13px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .rank1 .reshead{background:linear-gradient(90deg,#2b5f8a,#3a7ab0);color:#fff}
+  .rank2 .reshead{background:var(--accent-light)}
+  .rank3 .reshead,.rank0 .reshead{background:#f2f5f8}
+  .rankbadge{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap}
+  .rank1 .rankbadge{background:#fff;color:var(--accent-dark)}
+  .rank2 .rankbadge,.rank3 .rankbadge{background:var(--accent);color:#fff}
+  .fname{font-size:18px;font-weight:700}
+  .fkana{font-size:11.5px;opacity:.8}
+  .fno{font-size:11.5px;opacity:.75;margin-left:auto;white-space:nowrap;text-align:right}
+  .fcat{display:inline-block;font-size:10.5px;background:rgba(120,140,160,.18);border-radius:999px;
+        padding:1px 8px;margin-top:2px}
+  .resbody{padding:12px 14px 14px}
+  .sec{margin-bottom:12px}
+  .sec h3{font-size:13px;color:var(--accent-dark);margin-bottom:5px;display:flex;align-items:center;gap:5px}
+  .sec h3::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--accent);flex:0 0 auto}
+  .sec p{font-size:13.5px;color:var(--text)}
+  .matchchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+  .mchip{font-size:12px;background:var(--accent-light);color:var(--accent-dark);border:1px solid #c4d6e6;
+         padding:2px 9px;border-radius:999px;font-weight:700}
+  .effchip{font-size:12px;background:var(--ok-bg);color:var(--ok);border:1px solid #bfe2cf;
+           padding:2px 9px;border-radius:999px;font-weight:700}
+  details{border:1px solid var(--line);border-radius:10px;margin-top:8px;background:#fbfcfe}
+  details summary{padding:9px 12px;font-size:13.5px;font-weight:700;color:var(--accent-dark);
+      cursor:pointer;list-style:none;display:flex;align-items:center}
+  details summary::after{content:"＋";margin-left:auto;color:var(--sub);font-weight:400}
+  details[open] summary::after{content:"－"}
+  details .dbody{padding:0 12px 12px;font-size:13.5px}
+  .herbtable{width:100%;border-collapse:collapse;font-size:13px}
+  .herbtable td{padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  .herbtable td:first-child{white-space:nowrap;font-weight:700;color:var(--accent-dark);width:6.5em}
+  .diffitem{padding:7px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  .diffitem:last-child{border-bottom:none}
+  .diffitem b{color:var(--accent-dark)}
+  .warnbox{border-radius:10px;padding:9px 12px;font-size:13px;margin-top:6px}
+  .warnbox.danger{background:var(--danger-bg);border:1px solid #eec5bf;color:var(--danger)}
+  .warnbox.warn{background:var(--warn-bg);border:1px solid #ead9a8;color:var(--warn)}
+  .warnbox ul{margin-left:1.2em}
+  .globalwarn{margin-bottom:14px}
+
+  /* 処方一覧 */
+  #listView{display:none}
+  .searchrow{display:flex;gap:8px;margin-bottom:10px;position:sticky;top:96px;z-index:10}
+  #searchBox{flex:1;padding:11px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:15px;
+             background:#fff;color:var(--text)}
+  .catbar{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:6px;
+          -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .catbar::-webkit-scrollbar{display:none}
+  .catbtn{flex:0 0 auto;font-size:12.5px;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);
+          background:#fff;color:var(--sub);font-weight:700;white-space:nowrap}
+  .catbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .listitem{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);
+      border-radius:10px;padding:10px 12px;margin-bottom:7px;cursor:pointer}
+  .listitem:active{background:var(--accent-light)}
+  .li-name{font-weight:700;font-size:15px}
+  .li-kana{font-size:11px;color:var(--sub)}
+  .li-no{margin-left:auto;font-size:11.5px;color:var(--sub);white-space:nowrap}
+  .li-cat{font-size:10.5px;background:var(--accent-light);color:var(--accent-dark);border-radius:999px;
+          padding:1px 8px;white-space:nowrap}
+  .listcount{font-size:12px;color:var(--sub);margin:4px 2px 8px}
+  #listDetail{margin-bottom:12px}
+
+  /* 追加質問 */
+  .askbox{background:var(--accent-light);border:1px solid #c4d6e6;border-radius:12px;padding:12px 14px;margin-bottom:16px}
+  .askbox h3{font-size:14px;color:var(--accent-dark);margin-bottom:6px}
+  .askbox li{margin-left:1.3em;font-size:13.5px;margin-bottom:3px}
+  .nores{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;
+         color:var(--sub);margin-bottom:16px;font-size:14px}
+  footer{max-width:860px;margin:6px auto 0;padding:0 14px;font-size:11px;color:var(--sub);text-align:center}
+  @media (max-width:480px){ .chips{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
+    .chip span{font-size:12.5px;min-height:42px} .searchrow{top:104px} }
+</style>
+</head>
+<body>
+<header>
+  <h1>漢方外来サポート</h1>
+  <p>症状・所見から候補処方を最大3剤提示（医療従事者向け・選択補助ツール）</p>
+  <div class="tabs">
+    <button id="tabSym" class="active" onclick="switchTab('sym')">症状から選ぶ</button>
+    <button id="tabList" onclick="switchTab('list')">処方一覧</button>
+  </div>
+</header>
+
+<main>
+<div id="inputView">
+
+  <div class="card">
+    <h2>基本情報 <small>未入力でも結果表示できます</small></h2>
+    <div class="basic">
+      <div class="field"><label>年齢</label><input type="number" id="age" min="0" max="120" inputmode="numeric" placeholder="例：65"></div>
+      <div class="field"><label>性別</label>
+        <div class="seg">
+          <label><input type="radio" name="sex" value="male"><span>男性</span></label>
+          <label><input type="radio" name="sex" value="female"><span>女性</span></label>
+        </div>
+      </div>
+      <div class="field"><label>体重（kg）</label><input type="number" id="weight" min="0" max="200" inputmode="decimal" placeholder="例：52"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>症状 <small>当てはまるものをタップ</small></h2>
+    <div class="chips" id="symChips"></div>
+  </div>
+
+  <div class="card">
+    <h2>所見・体質</h2>
+    <div class="chips" id="findChips"></div>
+  </div>
+
+  <div class="card">
+    <h2>患者背景（安全性チェック）<small>該当があれば警告を表示します</small></h2>
+    <div class="chips bgchips" id="bgChips"></div>
+  </div>
+  <p class="selcount" id="selCount">選択：0項目</p>
+</div>
+
+<div id="result">
+  <button class="backlink" onclick="backToInput()">← 入力に戻る</button>
+  <div id="resultInner"></div>
+</div>
+
+<div id="listView">
+  <div class="searchrow"><input type="search" id="searchBox" placeholder="処方名・かな・番号で検索（例：ごれい、107）" oninput="renderList()"></div>
+  <div class="catbar" id="catBar"></div>
+  <div id="listDetail"></div>
+  <p class="listcount" id="listCount"></p>
+  <div id="listItems"></div>
+</div>
+</main>
+
+<div class="bottombar"><div class="inner">
+  <button id="resetBtn" onclick="resetAll()">リセット</button>
+  <button id="showBtn" onclick="showResult()">候補を表示</button>
+</div></div>
+
+<footer>ツムラ医療用漢方製剤 全130品目（TJ-1〜138・501）収載。本ツールは漢方薬選択の補助を目的とした参考情報であり、診断・処方の最終判断は医師が行ってください。<br>
+添付文書・一般的な漢方治療ハンドブックの記載に基づく。入力内容は端末に保存されません。</footer>
+
+<script>window.KAMPO_DATA=[];</script>
+<script src="data1.js"></script>
+<script src="data2.js"></script>
+<script src="data3.js"></script>
+<script src="data4.js"></script>
+<script>
+"use strict";
+
+/* ============ 項目定義 ============ */
+const SYMPTOMS = [
+ ["headache","頭痛"],["facePain","顔面痛"],["neckPain","頸部痛"],["shoulder","肩こり"],
+ ["lowBack","腰痛"],["joint","関節痛"],["neural","神経痛"],["limb","四肢痛"],
+ ["numb","しびれ"],["coldWorse","冷えると悪化"],["weatherWorse","天候で悪化"],["dizzy","めまい"],
+ ["fatigue","倦怠感"],["insomnia","不眠"],["anxiety","不安"],["irritable","イライラ"],
+ ["appetite","食欲低下"],["nausea","悪心"],["abdPain","腹痛"],["constip","便秘"],
+ ["diarrhea","下痢"],["edema","むくみ"],["cold","冷え"],["hotFlush","のぼせ"],
+ ["sweat","発汗"],["palpit","動悸"],["menses","月経関連症状"]
+];
+const FINDINGS = [
+ ["fCold","冷え性"],["fWeak","虚弱"],["fStrong","体力がある"],["fWeakGI","胃腸が弱い"],
+ ["fStress","ストレスで悪化"],["fRain","雨の日・低気圧で悪化"],["fCramp","筋肉がつりやすい"],
+ ["fTender","圧痛がある"],["fConstip","便秘傾向"],["fDiarrhea","下痢傾向"],
+ ["fEdema","むくみやすい"],["fHotFlush","のぼせやすい"]
+];
+const BACKGROUND = [
+ ["bgPreg","妊娠中・妊娠の可能性"],["bgLact","授乳中"],["bgRenal","腎機能障害"],["bgHepatic","肝機能障害"],
+ ["bgILD","間質性肺炎の既往"],["bgHypoK","低K血症・偽アルドステロン症の既往"],
+ ["bgHT","高血圧・心疾患"],["bgOtherKampo","他の漢方薬を服用中"]
+];
+const LABELS = {};
+[...SYMPTOMS, ...FINDINGS, ...BACKGROUND].forEach(([k,v])=>LABELS[k]=v);
+
+const FORMULAS = window.KAMPO_DATA;
+
+/* ============ 追加確認の質問 ============ */
+const FOLLOWUP = [
+ {need:["cold","fCold"], q:"冷えはありますか？（手足・腰・お腹など、どこが冷えるか）"},
+ {need:["coldWorse"], q:"痛みは温めると改善しますか？冷えると悪化しますか？"},
+ {need:["edema","fEdema"], q:"むくみはありますか？（夕方の下腿浮腫・指輪のきつさなど）"},
+ {need:["fWeakGI","appetite"], q:"胃腸は弱いですか？（胃もたれ・食欲低下・軟便など）"},
+ {need:["weatherWorse","fRain"], q:"雨の日・低気圧・天候の変化で症状は悪化しますか？"},
+ {need:["fStress"], q:"ストレスや緊張で症状は悪化しますか？"},
+ {need:["fCramp"], q:"足がつる・こむら返りはありますか？"},
+ {need:["fStrong","fWeak"], q:"体力・疲れやすさはどうですか？（実証／虚証の見当）"},
+ {need:["hotFlush","fHotFlush"], q:"のぼせ・ほてりはありますか？（冷えのぼせを含む）"},
+ {need:["menses"], q:"（女性の場合）月経と症状の関連はありますか？", sexOnly:"female"}
+];
+
+/* ============ 状態取得 ============ */
+function buildChips(){
+  const mk=(list,elId)=>{
+    const el=document.getElementById(elId);
+    el.innerHTML=list.map(([k,v])=>`<label class="chip"><input type="checkbox" data-k="${k}"><span>${v}</span></label>`).join("");
+  };
+  mk(SYMPTOMS,"symChips"); mk(FINDINGS,"findChips"); mk(BACKGROUND,"bgChips");
+  document.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener("change",updateCount));
+}
+function getState(){
+  const s={checked:{},bg:{}};
+  document.querySelectorAll('#symChips input,#findChips input').forEach(c=>{ if(c.checked)s.checked[c.dataset.k]=1; });
+  document.querySelectorAll('#bgChips input').forEach(c=>{ if(c.checked)s.bg[c.dataset.k]=1; });
+  s.age=parseFloat(document.getElementById("age").value); if(isNaN(s.age))s.age=null;
+  s.weight=parseFloat(document.getElementById("weight").value); if(isNaN(s.weight))s.weight=null;
+  const sexEl=document.querySelector('input[name=sex]:checked'); s.sex=sexEl?sexEl.value:null;
+  return s;
+}
+function updateCount(){
+  const n=document.querySelectorAll('#symChips input:checked,#findChips input:checked,#bgChips input:checked').length;
+  document.getElementById("selCount").textContent="選択："+n+"項目";
+}
+
+/* ============ スコアリング ============ */
+function scoreFormula(f,s){
+  let score=0; const matched=[]; const w=f.w||{};
+  for(const k in w){
+    if(s.checked[k]){ score+=w[k]; if(w[k]>0)matched.push(k); }
+  }
+  if(s.age!=null){
+    if(s.age>=65){ if(f.id==="goshajinkigan")score+=2; if(f.id==="hachimijiogan")score+=2;
+                   if(f.id==="chotosan")score+=1; if(f.id==="junchoto")score+=1; if(f.id==="mashiningan")score+=1; }
+    if(s.age>=75 && f.flags.mao)score-=2;
+  }
+  return {score,matched};
+}
+
+/* ============ 安全性警告 ============ */
+function formulaWarnings(f,s){
+  const dangers=[],warns=[];
+  const elderly=(s.age!=null&&s.age>=75), lowWt=(s.weight!=null&&s.weight<40), child=(s.age!=null&&s.age<15);
+  if(f.flags.topical){
+    warns.push("外用剤：内服の安全性チェック（甘草等）の対象外。患部の状態に応じて使用。");
+    return {dangers,warns};
+  }
+  if(f.flags.kanzo){
+    let t="甘草含有：偽アルドステロン症（低K血症・血圧上昇・浮腫・ミオパチー）に注意。";
+    if(f.flags.kanzoHigh)t="甘草を高用量（1日3g以上）含有：偽アルドステロン症のリスクが特に高く、長期連用時はK値を定期確認。";
+    if(s.bg.bgHypoK){dangers.push("低K血症・偽アルドステロン症の既往あり："+(f.flags.kanzoHigh?"本剤（甘草高用量）は原則回避。":"甘草含有のため原則回避か、使用時はK値を厳重に監視。"));}
+    else if(s.bg.bgOtherKampo){warns.push(t+" 他の漢方薬を服用中のため甘草の重複量を必ず確認。");}
+    else if(elderly){warns.push(t+" 高齢者では利尿薬併用等でリスク増加。");}
+    else {warns.push(t);}
+  }
+  if(f.flags.mao){
+    let t="麻黄含有：動悸・血圧上昇・不眠・排尿障害に注意。";
+    if(f.flags.maoHigh)t="麻黄を比較的多く（1日4g以上）含有：動悸・血圧上昇・不眠に特に注意。";
+    if(s.bg.bgHT){dangers.push("高血圧・心疾患あり：麻黄含有のため原則回避か、少量から慎重に。");}
+    else if(elderly||s.checked.palpit){warns.push(t+"（高齢者・動悸のある患者では減量や他剤への変更を検討）");}
+    else {warns.push(t);}
+  }
+  if(f.flags.bushi){
+    let t="附子含有：動悸・のぼせ・舌のしびれ・悪心（附子中毒）に注意。のぼせ・熱感の強い患者は不向き。";
+    if(s.bg.bgPreg){dangers.push("妊娠中・妊娠の可能性あり：附子含有製剤は原則回避。");}
+    else if(s.checked.hotFlush||s.checked.fHotFlush){warns.push(t+" のぼせが選択されており慎重に。");}
+    else {warns.push(t);}
+  }
+  if(f.flags.ogon){
+    if(s.bg.bgILD){dangers.push("間質性肺炎の既往あり：黄芩含有製剤は原則回避。");}
+    else {warns.push("黄芩含有：間質性肺炎・肝機能障害の報告あり。乾性咳嗽・発熱・呼吸困難が出たら中止し受診を指示。");}
+  }
+  if(f.flags.daio){
+    if(s.bg.bgPreg){dangers.push("妊娠中・妊娠の可能性あり：大黄含有製剤は子宮収縮・骨盤内充血作用のため原則回避。");}
+    else {
+      let t="大黄含有：腹痛・下痢に注意。瀉下作用は個人差が大きく少量から調整。";
+      if(s.bg.bgLact)t+=" 授乳中は乳児の下痢に注意。";
+      if(s.checked.diarrhea||s.checked.fDiarrhea)t+=" 下痢傾向が選択されており慎重に。";
+      warns.push(t);
+    }
+  }
+  if(f.flags.jio && (s.checked.fWeakGI||s.checked.appetite)){warns.push("地黄含有：胃腸虚弱の患者では胃もたれ・食欲低下が出やすい。食後服用や六君子湯併用も考慮。");}
+  if(f.flags.sanshishi){warns.push("山梔子含有：長期投与（目安5年以上）で腸間膜静脈硬化症の報告。長期使用時は腹痛・下痢・便潜血に注意。");}
+  if(f.flags.kuoketsu && s.bg.bgPreg){dangers.push("妊娠中・妊娠の可能性あり：桃仁・牡丹皮・紅花など駆瘀血薬含有のため原則回避。");}
+  if(s.bg.bgHepatic){warns.push("肝機能障害あり：漢方薬による薬物性肝障害の報告があり、投与後の肝機能フォローを推奨。");}
+  if(s.bg.bgRenal && (f.flags.kanzo||f.flags.mao||f.flags.bushi)){warns.push("腎機能障害あり：甘草（低K）・麻黄・附子含有製剤は電解質・血圧への影響に注意。");}
+  if(child){warns.push("15歳未満：小児用量（年齢・体重に応じ1/2〜2/3等）へ調整。");}
+  else if(lowWt){warns.push("低体重（40kg未満）：常用量で効果過剰・副作用が出やすく、2/3量など減量開始も考慮。");}
+  return {dangers,warns};
+}
+function globalWarnings(s){
+  const list=[];
+  if(s.bg.bgPreg)list.push("【妊娠】妊娠中の漢方投与は原則として産科と相談。駆瘀血薬（桃仁・牡丹皮・紅花）、大黄、芒硝、附子、麻黄、薏苡仁含有製剤は避ける。");
+  if(s.bg.bgLact)list.push("【授乳】多くの漢方薬は授乳中も使用されるが、大黄含有製剤は乳児の下痢に注意。");
+  if(s.age!=null&&s.age>=75)list.push("【高齢者】生理機能低下により副作用が出やすい。麻黄・附子は減量を考慮し、甘草含有剤では低K血症を定期確認。");
+  if(s.bg.bgOtherKampo)list.push("【漢方薬の重複】現在服用中の漢方薬との生薬重複（特に甘草・麻黄・附子・地黄・大黄）を必ず確認。甘草の合計量に注意。");
+  if(s.bg.bgHypoK)list.push("【低K血症・偽アルドステロン症の既往】甘草含有製剤は原則回避。使用する場合はK値を厳重に監視。");
+  if(s.bg.bgILD)list.push("【間質性肺炎の既往】黄芩含有製剤（柴胡剤など）は原則回避。他剤でも乾性咳嗽・発熱の出現に注意。");
+  if(s.bg.bgRenal)list.push("【腎機能障害】電解質異常（甘草）・血圧上昇（麻黄）に注意し、定期的に電解質を確認。");
+  if(s.bg.bgHepatic)list.push("【肝機能障害】薬物性肝障害の報告がある製剤（黄芩含有ほか）に注意し、投与後に肝機能をフォロー。");
+  return list;
+}
+
+/* ============ 結果表示 ============ */
+function showResult(){
+  const s=getState();
+  const ranked=FORMULAS.map(f=>{const r=scoreFormula(f,s);return {f,score:r.score,matched:r.matched};})
+    .filter(x=>x.score>=3&&x.matched.length>=1)
+    .sort((a,b)=>b.score-a.score||b.matched.length-a.matched.length)
+    .slice(0,3);
+  const inner=document.getElementById("resultInner");
+  let html="";
+
+  const gw=globalWarnings(s);
+  if(gw.length)html+=`<div class="warnbox danger globalwarn"><b>患者背景に基づく注意</b><ul>${gw.map(t=>`<li>${t}</li>`).join("")}</ul></div>`;
+
+  const nSel=Object.keys(s.checked).length;
+  if(ranked.length===0){
+    html+=`<div class="nores">選択された情報からは候補を十分に絞り込めませんでした。<br>下記の項目を追加で確認してみてください。</div>`;
+  }else{
+    const rankNames=["第一候補","第二候補","第三候補"];
+    ranked.forEach((x,i)=>{ html+=renderCard(x.f,x.matched,rankNames[i],i+1,s); });
+    if(ranked.filter(x=>x.f.flags.kanzo).length>=2)
+      html+=`<div class="warnbox warn"><b>甘草重複注意：</b>上記候補のうち複数が甘草を含みます。併用する場合は甘草の合計量（目安：1日2.5g以下が安全域）に注意してください。</div>`;
+  }
+  if(nSel<3||ranked.length<2||ranked.length===0){
+    const qs=FOLLOWUP.filter(fu=>{
+      if(fu.sexOnly&&s.sex&&s.sex!==fu.sexOnly)return false;
+      return !fu.need.some(k=>s.checked[k]);
+    }).slice(0,6);
+    if(qs.length)html+=`<div class="askbox"><h3>追加で確認すると選びやすい項目</h3><ul>${qs.map(q=>`<li>${q.q}</li>`).join("")}</ul></div>`;
+  }
+  inner.innerHTML=html;
+  switchTab('sym');
+  document.getElementById("inputView").style.display="none";
+  document.getElementById("result").style.display="block";
+  window.scrollTo({top:0});
+}
+
+function renderCard(f,matched,rankName,rank,s){
+  const {dangers,warns}=formulaWarnings(f,s);
+  const mchips=matched.map(k=>`<span class="mchip">${LABELS[k]||k}</span>`).join("");
+  const effs=(f.effects||[]).map(e=>`<span class="effchip">${e}</span>`).join(" ");
+  const herbs=(f.herbs||[]).map(h=>`<tr><td>${h[0]}</td><td>${h[1]}</td></tr>`).join("");
+  const diffs=(f.diff||[]).map(d=>`<div class="diffitem"><b>${d[0]}との使い分け：</b>${d[1]}</div>`).join("");
+  const badge=rankName?`<span class="rankbadge">${rankName}</span>`:"";
+  const reasonSec=rank>0
+    ?`<div class="sec"><h3>この薬を選択した理由</h3><div class="matchchips">${mchips}</div><p>${f.fit}</p></div>`
+    :`<div class="sec"><h3>適応の目安</h3><p>${f.fit}</p></div>`;
+  return `<div class="rescard rank${rank}">
+    <div class="reshead">
+      ${badge}
+      <div><div class="fname">${f.name}</div><div class="fkana">${f.kana}</div></div>
+      <span class="fno">${f.no}<br><span class="fcat">${f.cat||""}</span></span>
+    </div>
+    <div class="resbody">
+      ${reasonSec}
+      <div class="sec"><h3>期待できる効果</h3><p>${effs}</p></div>
+      ${dangers.map(t=>`<div class="warnbox danger">⚠ ${t}</div>`).join("")}
+      ${warns.map(t=>`<div class="warnbox warn">△ ${t}</div>`).join("")}
+      <details><summary>なぜ効くのか（漢方医学／現代医学）</summary><div class="dbody">
+        <p style="margin-bottom:8px"><b>漢方医学的：</b>${f.kampo}</p>
+        <p><b>現代医学的：</b>${f.modern}</p></div></details>
+      <details><summary>構成生薬とその役割</summary><div class="dbody">
+        <table class="herbtable">${herbs}</table></div></details>
+      <details><summary>服用時の注意</summary><div class="dbody"><p>${f.caution}</p></div></details>
+      <details><summary>副作用・禁忌</summary><div class="dbody"><p>${f.adverse}</p></div></details>
+      <details><summary>類似処方との使い分け</summary><div class="dbody">${diffs||"<p>—</p>"}</div></details>
+      <details><summary>エビデンス</summary><div class="dbody"><p>${f.evidence}</p></div></details>
+    </div></div>`;
+}
+
+/* ============ 処方一覧 ============ */
+let curCat="すべて";
+function switchTab(t){
+  const isList=(t==='list');
+  document.getElementById("tabSym").classList.toggle("active",!isList);
+  document.getElementById("tabList").classList.toggle("active",isList);
+  document.getElementById("listView").style.display=isList?"block":"none";
+  if(isList){
+    document.getElementById("inputView").style.display="none";
+    document.getElementById("result").style.display="none";
+    renderCatBar(); renderList();
+  }else{
+    if(document.getElementById("resultInner").innerHTML && document.getElementById("result").style.display==="block"){}
+    else{ document.getElementById("inputView").style.display="block"; }
+  }
+}
+function renderCatBar(){
+  const cats=["すべて",...new Set(FORMULAS.map(f=>f.cat).filter(Boolean))];
+  document.getElementById("catBar").innerHTML=cats.map(c=>
+    `<button class="catbtn${c===curCat?' active':''}" onclick="curCat='${c}';renderCatBar();renderList()">${c}</button>`).join("");
+}
+function normKana(t){return (t||"").replace(/[ァ-ン]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60));}
+function renderList(){
+  const q=normKana(document.getElementById("searchBox").value.trim().toLowerCase());
+  const hits=FORMULAS.filter(f=>{
+    if(curCat!=="すべて"&&f.cat!==curCat)return false;
+    if(!q)return true;
+    return f.name.includes(q)||normKana(f.kana).includes(q)||f.no.replace("ツムラ","").includes(q)||(f.cat||"").includes(q);
+  });
+  document.getElementById("listCount").textContent=hits.length+"処方";
+  document.getElementById("listItems").innerHTML=hits.map(f=>
+    `<div class="listitem" onclick="showListDetail('${f.id}')">
+       <div><div class="li-name">${f.name}</div><div class="li-kana">${f.kana}</div></div>
+       <span class="li-cat">${f.cat||""}</span><span class="li-no">${f.no}</span></div>`).join("");
+}
+function showListDetail(id){
+  const f=FORMULAS.find(x=>x.id===id); if(!f)return;
+  const s=getState();
+  document.getElementById("listDetail").innerHTML=
+    `<button class="backlink" onclick="document.getElementById('listDetail').innerHTML='';window.scrollTo({top:0})">← 一覧に戻る</button>`
+    +renderCard(f,[],null,0,s);
+  window.scrollTo({top:0});
+}
+
+function backToInput(){
+  document.getElementById("result").style.display="none";
+  document.getElementById("inputView").style.display="block";
+  window.scrollTo({top:0});
+}
+function resetAll(){
+  document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
+  document.querySelectorAll('input[name=sex]').forEach(c=>c.checked=false);
+  document.getElementById("age").value="";document.getElementById("weight").value="";
+  updateCount(); switchTab('sym'); backToInput();
+}
+buildChips();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>

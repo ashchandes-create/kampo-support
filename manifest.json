@@ -1,0 +1,26 @@
+{
+  "name": "漢方外来サポート",
+  "short_name": "漢方サポート",
+  "description": "症状・所見から候補となる漢方薬を最大3剤提示する医療者向けの選択補助ツール。ツムラ医療用漢方製剤 全129品目（TJ-1〜138・501）を内蔵し、甘草・麻黄・附子など生薬に基づく安全性チェックと処方一覧検索を備える。",
+  "start_url": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f9",
+  "theme_color": "#2b5f8a",
+  "lang": "ja",
+  "categories": ["medical", "utilities"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
