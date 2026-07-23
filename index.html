@@ -16,6 +16,11 @@
     --bg:#f4f6f9; --card:#ffffff; --text:#1f2a36; --sub:#5a6b7c;
     --line:#dde4ec; --danger:#c0392b; --danger-bg:#fdeeec;
     --warn:#9a6b00; --warn-bg:#fdf6e3; --ok:#1e7a4f; --ok-bg:#e9f6ef;
+    /* セクション色 */
+    --c-basic:#5a6b7c; --c-basic-bg:#f3f5f8;
+    --c-sym:#2b5f8a;   --c-sym-bg:#eef4fa;
+    --c-find:#2e8b74;  --c-find-bg:#eaf6f1;
+    --c-bg:#c0392b;    --c-bg-bg:#fdf3f2;
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   body{font-family:"Hiragino Kaku Gothic ProN","Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif;
@@ -32,10 +37,19 @@
   main{max-width:860px;margin:0 auto;padding:14px 12px 20px}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
-        padding:14px 14px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,40,60,.05)}
-  .card h2{font-size:15px;color:var(--accent-dark);border-left:4px solid var(--accent);
-           padding-left:8px;margin-bottom:10px;letter-spacing:.02em}
-  .card h2 small{font-weight:400;color:var(--sub);font-size:11.5px;margin-left:6px}
+        padding:14px 14px 16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(20,40,60,.05);
+        border-top:3px solid var(--sec,var(--accent))}
+  .card h2{font-size:15px;color:var(--sec-dark,var(--accent-dark));border-left:4px solid var(--sec,var(--accent));
+           padding-left:8px;margin-bottom:4px;letter-spacing:.02em;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+  .card h2 small{font-weight:400;color:var(--sub);font-size:11.5px}
+  .card .hint{font-size:11.5px;color:var(--sub);margin:0 0 10px 12px}
+  .secbadge{font-size:10.5px;font-weight:700;color:#fff;background:var(--sec,var(--accent));
+            border-radius:999px;padding:2px 9px}
+  /* セクション別テーマ */
+  .sec-basic{--sec:var(--c-basic);--sec-dark:#3f4d5a;background:var(--c-basic-bg)}
+  .sec-sym{--sec:var(--c-sym);--sec-dark:var(--accent-dark);background:var(--c-sym-bg)}
+  .sec-find{--sec:var(--c-find);--sec-dark:#1f6b58;background:var(--c-find-bg)}
+  .sec-bg{--sec:var(--c-bg);--sec-dark:#8f2419;background:var(--c-bg-bg);border-color:#eec5bf;border-top-color:var(--c-bg)}
 
   /* 基本情報 */
   .basic{display:flex;flex-wrap:wrap;gap:10px}
@@ -43,23 +57,31 @@
   .basic label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
   .basic input[type=number]{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;
         font-size:16px;background:#fff;color:var(--text)}
-  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
   .seg label{flex:1;margin:0}
   .seg input{display:none}
   .seg span{display:block;text-align:center;padding:10px 4px;font-size:14px;cursor:pointer;
             background:#fff;color:var(--sub);border-right:1px solid var(--line);user-select:none}
   .seg label:last-child span{border-right:none}
-  .seg input:checked + span{background:var(--accent);color:#fff;font-weight:700}
+  .seg input:checked + span{background:var(--c-basic);color:#fff;font-weight:700}
 
   /* チェックボックス群 */
-  .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px}
+  .grouplabel{font-size:12px;font-weight:700;color:var(--sec-dark,var(--sub));margin:12px 0 6px;
+              display:flex;align-items:center;gap:6px}
+  .grouplabel::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--sec,var(--accent))}
+  .chipwrap > .grouplabel:first-child{margin-top:2px}
+  .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
   .chip{position:relative;user-select:none}
   .chip input{position:absolute;opacity:0;pointer-events:none}
-  .chip span{display:flex;align-items:center;justify-content:center;text-align:center;min-height:44px;
-      padding:8px 6px;border:1.5px solid var(--line);border-radius:10px;background:#fff;
-      font-size:13.5px;cursor:pointer;transition:all .12s;color:var(--text)}
-  .chip input:checked + span{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
-  .chips.bgchips .chip input:checked + span{background:var(--danger);border-color:var(--danger)}
+  .chip span{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+      min-height:46px;padding:7px 6px;border:1.5px solid var(--line);border-radius:10px;background:#fff;
+      cursor:pointer;transition:all .12s;color:var(--text);gap:2px}
+  .chip .clab{font-size:13.5px;font-weight:700;line-height:1.2}
+  .chip .cdesc{font-size:10px;font-weight:400;opacity:.72;line-height:1.25}
+  .sec-sym  .chip input:checked + span{background:var(--c-sym); border-color:var(--c-sym); color:#fff}
+  .sec-find .chip input:checked + span{background:var(--c-find);border-color:var(--c-find);color:#fff}
+  .sec-bg   .chip input:checked + span{background:var(--c-bg);  border-color:var(--c-bg);  color:#fff}
+  .chip input:checked + span .cdesc{opacity:.92;color:#fff}
 
   /* 下部固定バー */
   .bottombar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.96);
@@ -99,6 +121,7 @@
   .matchchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
   .mchip{font-size:12px;background:var(--accent-light);color:var(--accent-dark);border:1px solid #c4d6e6;
          padding:2px 9px;border-radius:999px;font-weight:700}
+  .mchip.kampo{background:var(--c-find-bg);color:#1f6b58;border-color:#bfe0d5}
   .effchip{font-size:12px;background:var(--ok-bg);color:var(--ok);border:1px solid #bfe2cf;
            padding:2px 9px;border-radius:999px;font-weight:700}
   details{border:1px solid var(--line);border-radius:10px;margin-top:8px;background:#fbfcfe}
@@ -107,6 +130,12 @@
   details summary::after{content:"＋";margin-left:auto;color:var(--sub);font-weight:400}
   details[open] summary::after{content:"－"}
   details .dbody{padding:0 12px 12px;font-size:13.5px}
+  /* 処方一覧の詳細：開かずに全部見える静的ブロック */
+  .block{border:1px solid var(--line);border-radius:10px;margin-top:8px;background:#fbfcfe;padding:10px 12px 12px}
+  .block > h4{font-size:13px;font-weight:700;color:var(--accent-dark);margin-bottom:6px;
+              display:flex;align-items:center;gap:5px}
+  .block > h4::before{content:"";width:7px;height:7px;border-radius:2px;background:var(--accent)}
+  .block .dbody{font-size:13.5px}
   .herbtable{width:100%;border-collapse:collapse;font-size:13px}
   .herbtable td{padding:6px 6px;border-bottom:1px solid var(--line);vertical-align:top}
   .herbtable td:first-child{white-space:nowrap;font-weight:700;color:var(--accent-dark);width:6.5em}
@@ -142,14 +171,14 @@
   #listDetail{margin-bottom:12px}
 
   /* 追加質問 */
-  .askbox{background:var(--accent-light);border:1px solid #c4d6e6;border-radius:12px;padding:12px 14px;margin-bottom:16px}
-  .askbox h3{font-size:14px;color:var(--accent-dark);margin-bottom:6px}
+  .askbox{background:var(--c-find-bg);border:1px solid #bfe0d5;border-radius:12px;padding:12px 14px;margin-bottom:16px}
+  .askbox h3{font-size:14px;color:#1f6b58;margin-bottom:6px}
   .askbox li{margin-left:1.3em;font-size:13.5px;margin-bottom:3px}
   .nores{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;
          color:var(--sub);margin-bottom:16px;font-size:14px}
   footer{max-width:860px;margin:6px auto 0;padding:0 14px;font-size:11px;color:var(--sub);text-align:center}
-  @media (max-width:480px){ .chips{grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
-    .chip span{font-size:12.5px;min-height:42px} .searchrow{top:104px} }
+  @media (max-width:480px){ .chips{grid-template-columns:repeat(auto-fill,minmax(108px,1fr))}
+    .chip .clab{font-size:12.5px} .chip .cdesc{font-size:9.5px} .searchrow{top:104px} }
 </style>
 </head>
 <body>
@@ -165,7 +194,7 @@
 <main>
 <div id="inputView">
 
-  <div class="card">
+  <div class="card sec-basic">
     <h2>基本情報 <small>未入力でも結果表示できます</small></h2>
     <div class="basic">
       <div class="field"><label>年齢</label><input type="number" id="age" min="0" max="120" inputmode="numeric" placeholder="例：65"></div>
@@ -179,19 +208,22 @@
     </div>
   </div>
 
-  <div class="card">
-    <h2>症状 <small>当てはまるものをタップ</small></h2>
-    <div class="chips" id="symChips"></div>
+  <div class="card sec-sym">
+    <h2>症状 <span class="secbadge">主訴</span></h2>
+    <p class="hint">患者さんの訴え（当てはまるものをタップ）</p>
+    <div id="symChips" class="chipwrap"></div>
   </div>
 
-  <div class="card">
-    <h2>所見・体質</h2>
-    <div class="chips" id="findChips"></div>
+  <div class="card sec-find">
+    <h2>所見・体質 <span class="secbadge">証（気血水・腹診）</span></h2>
+    <p class="hint">診察・問診で得た漢方的な所見。虚実寒熱・気血水・腹診の観点で選択すると候補が絞れます。</p>
+    <div id="findChips" class="chipwrap"></div>
   </div>
 
-  <div class="card">
-    <h2>患者背景（安全性チェック）<small>該当があれば警告を表示します</small></h2>
-    <div class="chips bgchips" id="bgChips"></div>
+  <div class="card sec-bg">
+    <h2>患者背景 <span class="secbadge">安全性チェック</span></h2>
+    <p class="hint">生薬・併存状態による禁忌・注意を判定します（該当があれば警告を表示）。</p>
+    <div id="bgChips" class="chipwrap"></div>
   </div>
   <p class="selcount" id="selCount">選択：0項目</p>
 </div>
@@ -215,8 +247,8 @@
   <button id="showBtn" onclick="showResult()">候補を表示</button>
 </div></div>
 
-<footer>ツムラ医療用漢方製剤 全130品目（TJ-1〜138・501）収載。本ツールは漢方薬選択の補助を目的とした参考情報であり、診断・処方の最終判断は医師が行ってください。<br>
-添付文書・一般的な漢方治療ハンドブックの記載に基づく。入力内容は端末に保存されません。</footer>
+<footer>ツムラ医療用漢方製剤 全129品目（TJ-1〜138・501）収載。所見の枠組みは気血水・腹診（和漢診療学）に基づく。<br>
+本ツールは漢方薬選択の補助を目的とした参考情報であり、診断・処方の最終判断は医師が行ってください。入力内容は端末に保存されません。</footer>
 
 <script>window.KAMPO_DATA=[];</script>
 <script src="data1.js"></script>
@@ -226,53 +258,142 @@
 <script>
 "use strict";
 
-/* ============ 項目定義 ============ */
-const SYMPTOMS = [
- ["headache","頭痛"],["facePain","顔面痛"],["neckPain","頸部痛"],["shoulder","肩こり"],
- ["lowBack","腰痛"],["joint","関節痛"],["neural","神経痛"],["limb","四肢痛"],
- ["numb","しびれ"],["coldWorse","冷えると悪化"],["weatherWorse","天候で悪化"],["dizzy","めまい"],
- ["fatigue","倦怠感"],["insomnia","不眠"],["anxiety","不安"],["irritable","イライラ"],
- ["appetite","食欲低下"],["nausea","悪心"],["abdPain","腹痛"],["constip","便秘"],
- ["diarrhea","下痢"],["edema","むくみ"],["cold","冷え"],["hotFlush","のぼせ"],
- ["sweat","発汗"],["palpit","動悸"],["menses","月経関連症状"]
+/* ============ 症状（主訴） ============ */
+const SYMPTOM_GROUPS = [
+ { label:"痛み・しびれ", items:[
+   ["headache","頭痛"],["facePain","顔面痛"],["neckPain","頸部痛"],["shoulder","肩こり"],
+   ["lowBack","腰痛"],["joint","関節痛"],["neural","神経痛"],["limb","四肢痛"],["numb","しびれ"],
+   ["coldWorse","冷えると悪化"],["weatherWorse","天候で悪化"]]},
+ { label:"全身・精神・自律神経", items:[
+   ["dizzy","めまい"],["fatigue","倦怠感"],["insomnia","不眠"],["anxiety","不安"],
+   ["irritable","イライラ"],["palpit","動悸"],["sweat","発汗"],["hotFlush","のぼせ"],["cold","冷え"]]},
+ { label:"消化器・その他", items:[
+   ["appetite","食欲低下"],["nausea","悪心"],["abdPain","腹痛"],["constip","便秘"],
+   ["diarrhea","下痢"],["edema","むくみ"],["menses","月経関連症状"]]}
 ];
-const FINDINGS = [
- ["fCold","冷え性"],["fWeak","虚弱"],["fStrong","体力がある"],["fWeakGI","胃腸が弱い"],
- ["fStress","ストレスで悪化"],["fRain","雨の日・低気圧で悪化"],["fCramp","筋肉がつりやすい"],
- ["fTender","圧痛がある"],["fConstip","便秘傾向"],["fDiarrhea","下痢傾向"],
- ["fEdema","むくみやすい"],["fHotFlush","のぼせやすい"]
+
+/* ============ 所見・体質（証：虚実寒熱・気血水・腹診） ============ */
+const FINDING_GROUPS = [
+ { label:"体質・証（虚実・寒熱）", items:[
+   ["fStrong","体力充実","がっちり・実証傾向"],
+   ["fWeak","虚弱","疲れやすい・虚証傾向"],
+   ["fCold","冷え性","寒がり・温めると楽（寒証）"],
+   ["fHotFlush","のぼせやすい","ほてり・顔が赤い（熱証）"],
+   ["fWeakGI","胃腸が弱い","食が細い・もたれやすい（脾虚）"]]},
+ { label:"気血水（きけつすい）", items:[
+   ["fKikyo","気虚","だるい・食後の眠気・気力低下"],
+   ["fKiutsu","気うつ","抑うつ・のどのつかえ・張った感じ"],
+   ["fKigyaku","気逆","冷えのぼせ・発作的な動悸や頭痛"],
+   ["fKekkyo","血虚","肌や髪の乾燥・こむら返り・顔色不良"],
+   ["fOketsu","瘀血","青あざ・目の下のくま・固定した刺す痛み・月経トラブル"],
+   ["fSuitai","水滞","むくみ・めまい・天候で悪化・胃のポチャポチャ"]]},
+ { label:"腹診（ふくしん）所見", items:[
+   ["fKyokyo","胸脇苦満","季肋部を押すと苦しい抵抗・圧痛"],
+   ["fShinka","心下痞硬","みぞおちのつかえ・抵抗"],
+   ["fFukuchoku","腹直筋の攣急","腹直筋が板状に突っ張る"],
+   ["fSaijoki","臍上悸","臍の上で拍動を触れる"],
+   ["fShofukufujin","小腹不仁","下腹部の力が抜け軟弱"],
+   ["fShofukukyuketsu","小腹急結","左下腹部の索状の圧痛"],
+   ["fShinsuion","胃部振水音","みぞおちを叩くと水の音"]]},
+ { label:"誘発・随伴", items:[
+   ["fStress","ストレスで悪化",""],
+   ["fRain","天候・低気圧で悪化",""],
+   ["fCramp","筋肉がつりやすい",""],
+   ["fTender","圧痛がある",""],
+   ["fConstip","便秘傾向",""],
+   ["fDiarrhea","下痢傾向",""],
+   ["fEdema","むくみやすい",""]]}
 ];
-const BACKGROUND = [
- ["bgPreg","妊娠中・妊娠の可能性"],["bgLact","授乳中"],["bgRenal","腎機能障害"],["bgHepatic","肝機能障害"],
- ["bgILD","間質性肺炎の既往"],["bgHypoK","低K血症・偽アルドステロン症の既往"],
- ["bgHT","高血圧・心疾患"],["bgOtherKampo","他の漢方薬を服用中"]
+
+/* ============ 患者背景（安全性） ============ */
+const BG_GROUPS = [
+ { label:"", items:[
+   ["bgPreg","妊娠中・可能性",""],["bgLact","授乳中",""],["bgRenal","腎機能障害",""],["bgHepatic","肝機能障害",""],
+   ["bgILD","間質性肺炎の既往",""],["bgHypoK","低K・偽アルドステロン症の既往",""],
+   ["bgHT","高血圧・心疾患",""],["bgOtherKampo","他の漢方薬を服用中",""]]}
 ];
+
 const LABELS = {};
-[...SYMPTOMS, ...FINDINGS, ...BACKGROUND].forEach(([k,v])=>LABELS[k]=v);
+[...SYMPTOM_GROUPS, ...FINDING_GROUPS, ...BG_GROUPS].forEach(g=>g.items.forEach(it=>LABELS[it[0]]=it[1]));
+/* 気血水・腹診の所見は漢方的鑑別を示すため matched chip を強調表示 */
+const KAMPO_KEYS = new Set(["fKikyo","fKiutsu","fKigyaku","fKekkyo","fOketsu","fSuitai",
+  "fKyokyo","fShinka","fFukuchoku","fSaijoki","fShofukufujin","fShofukukyuketsu","fShinsuion"]);
+
+/* ============ 証（気血水・腹診）に基づく方剤スコア加点 ============
+   各処方データ(w)は主訴中心。ここで漢方病態→代表方剤の重みを付与する。
+   典拠：気血水スコア・腹候（和漢診療学）の代表方剤対応。 */
+const PATTERN_WEIGHTS = {
+ fKikyo:{ hochuekkito:3, shikunshito:3, rikkunshito:2, juzentaihoto:2, ninjinyoeito:3, seishoekkito:2,
+   ninjinto:2, keihito:1, ogikenchuto:2, shokenchuto:1, kihito:2, kamikihito:2, hangebyakujutsutemmato:1, shimbuto:1 },
+ fKiutsu:{ hangekobokuto:3, kososan:3, saibokuto:2, shimpito:2, kamishoyosan:2, shigyakusan:2,
+   bukuryoingohangekobokuto:3, yokukansan:1, nyoshinsan:1, saikokeishikankyoto:1, jinsoin:1 },
+ fKigyaku:{ ryokeijutsukanto:3, keishikaryukotsuboreito:2, saikokaryukotsuboreito:1, nyoshinsan:2,
+   kamishoyosan:1, goshuyuto:1, keishito:1, shakanzoto:1, kambakutaisoto:1 },
+ fKekkyo:{ shimotsuto:3, tokishakuyakusan:2, juzentaihoto:2, unseiin:2, tokiinshi:3, shichimotsukokato:2,
+   kyukikyogaito:2, ninjinyoeito:2, sokeikakketsuto:1, kamikihito:1, kihito:1, unkeito:2, tokito:1,
+   tokikenchuto:1, daibofuto:1, sansoninto:1, junchoto:1 },
+ fOketsu:{ keishibukuryogan:3, tokakujokito:3, tsudosan:3, daiobotanpito:3, jidabokuippo:2, sokeikakketsuto:2,
+   keishibukuryogankayokuinin:2, unkeito:2, kamishoyosan:1, goshajinkigan:1, hachimijiogan:1, rokumigan:1,
+   otsujito:1, jizusoippo:1, tokishakuyakusan:1 },
+ fSuitai:{ goreisan:3, tokishakuyakusan:2, boiogito:2, ryokeijutsukanto:2, shimbuto:2, hangebyakujutsutemmato:2,
+   saireito:2, ireito:2, eppikajutsuto:1, goshakusan:1, ryokyojutsukanto:2, choreito:2, inchingoreisan:2,
+   bukuryoin:1, nichinto:1, shohangekabukuryoto:1, mokuboito:2, goshajinkigan:1, hachimijiogan:1,
+   choreitogoshimotsuto:1, ryokankyomishingeninto:1, yokuininto:1, makyoyokkanto:1, nijutsuto:1 },
+ fKyokyo:{ daisaikoto:3, shosaikoto:3, saikokeishito:2, saikokaryukotsuboreito:3, shigyakusan:2, saibokuto:2,
+   saikanto:2, kamishoyosan:1, saikoseikanto:2, otsujito:1, saireito:2, saikokeishikankyoto:2,
+   shosaikotokakikyosekko:2, jiinshihoto:1 },
+ fShinka:{ hangeshashinto:3, orento:2, sanoshashinto:2, daisaikoto:1, bukuryoin:1, ninjinto:1 },
+ fFukuchoku:{ shakuyakukanzoto:2, shokenchuto:3, keishikashakuyakuto:2, tokikenchuto:2, ogikenchuto:2,
+   shigyakusan:2, saikokeishito:1, keishikashakuyakudaioto:1, keishikaryukotsuboreito:1 },
+ fSaijoki:{ saikokaryukotsuboreito:3, keishikaryukotsuboreito:3, ryokeijutsukanto:2, shakanzoto:2, kambakutaisoto:1 },
+ fShofukufujin:{ hachimijiogan:3, goshajinkigan:3, rokumigan:2 },
+ fShofukukyuketsu:{ tokakujokito:3, daiobotanpito:2, keishibukuryogan:2, tsudosan:2 },
+ fShinsuion:{ rikkunshito:2, bukuryoin:2, hangebyakujutsutemmato:2, ryokeijutsukanto:2, ninjinto:2,
+   nichinto:1, shohangekabukuryoto:1, shikunshito:1, anchusan:1 }
+};
+function applyPatternWeights(){
+  for(const key in PATTERN_WEIGHTS){
+    const m=PATTERN_WEIGHTS[key];
+    for(const id in m){
+      const f=FORMULAS.find(x=>x.id===id);
+      if(f){ f.w=f.w||{}; if(!(key in f.w)) f.w[key]=m[id]; }
+    }
+  }
+}
 
 const FORMULAS = window.KAMPO_DATA;
 
-/* ============ 追加確認の質問 ============ */
+/* ============ 追加確認の質問（漢方の物差し） ============ */
 const FOLLOWUP = [
- {need:["cold","fCold"], q:"冷えはありますか？（手足・腰・お腹など、どこが冷えるか）"},
- {need:["coldWorse"], q:"痛みは温めると改善しますか？冷えると悪化しますか？"},
- {need:["edema","fEdema"], q:"むくみはありますか？（夕方の下腿浮腫・指輪のきつさなど）"},
- {need:["fWeakGI","appetite"], q:"胃腸は弱いですか？（胃もたれ・食欲低下・軟便など）"},
- {need:["weatherWorse","fRain"], q:"雨の日・低気圧・天候の変化で症状は悪化しますか？"},
- {need:["fStress"], q:"ストレスや緊張で症状は悪化しますか？"},
- {need:["fCramp"], q:"足がつる・こむら返りはありますか？"},
- {need:["fStrong","fWeak"], q:"体力・疲れやすさはどうですか？（実証／虚証の見当）"},
- {need:["hotFlush","fHotFlush"], q:"のぼせ・ほてりはありますか？（冷えのぼせを含む）"},
- {need:["menses"], q:"（女性の場合）月経と症状の関連はありますか？", sexOnly:"female"}
+ {need:["cold","fCold","coldWorse"], q:"冷えはありますか？温めると楽・冷えると悪化しますか？（寒熱の判定）"},
+ {need:["hotFlush","fHotFlush","fKigyaku"], q:"のぼせ・ほてり・冷えのぼせはありますか？（熱証・気逆）"},
+ {need:["fatigue","fKikyo","fWeak"], q:"疲れやすさ・食後の眠気・気力低下はありますか？（気虚）"},
+ {need:["anxiety","fKiutsu","fStress"], q:"抑うつ・のどのつかえ・お腹の張りはありますか？（気うつ）"},
+ {need:["menses","fOketsu","fTender"], q:"青あざ・目の下のくま・固定した刺す痛み・月経トラブルは？（瘀血）"},
+ {need:["edema","fEdema","fSuitai","dizzy","weatherWorse"], q:"むくみ・めまい・天候での悪化はありますか？（水滞）"},
+ {need:["fWeakGI","appetite","fShinsuion"], q:"胃腸は弱いですか？みぞおちを叩くと水の音がしますか？"},
+ {need:["fKyokyo","fShinka","fFukuchoku","fShofukufujin"], q:"腹診（胸脇苦満・心下痞硬・腹力・小腹不仁）を確認しましたか？"}
 ];
 
-/* ============ 状態取得 ============ */
+/* ============ チップ描画 ============ */
+function renderGroups(groups, elId, isBg){
+  const el=document.getElementById(elId);
+  el.innerHTML = groups.map(g=>{
+    const chips = g.items.map(it=>{
+      const k=it[0], lab=it[1], desc=it[2]||"";
+      return `<label class="chip"><input type="checkbox" data-k="${k}"><span>`
+        + `<span class="clab">${lab}</span>`
+        + (desc?`<span class="cdesc">${desc}</span>`:"")
+        + `</span></label>`;
+    }).join("");
+    const head = g.label?`<div class="grouplabel">${g.label}</div>`:"";
+    return head + `<div class="chips">${chips}</div>`;
+  }).join("");
+}
 function buildChips(){
-  const mk=(list,elId)=>{
-    const el=document.getElementById(elId);
-    el.innerHTML=list.map(([k,v])=>`<label class="chip"><input type="checkbox" data-k="${k}"><span>${v}</span></label>`).join("");
-  };
-  mk(SYMPTOMS,"symChips"); mk(FINDINGS,"findChips"); mk(BACKGROUND,"bgChips");
+  renderGroups(SYMPTOM_GROUPS,"symChips");
+  renderGroups(FINDING_GROUPS,"findChips");
+  renderGroups(BG_GROUPS,"bgChips",true);
   document.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener("change",updateCount));
 }
 function getState(){
@@ -385,15 +506,12 @@ function showResult(){
     html+=`<div class="nores">選択された情報からは候補を十分に絞り込めませんでした。<br>下記の項目を追加で確認してみてください。</div>`;
   }else{
     const rankNames=["第一候補","第二候補","第三候補"];
-    ranked.forEach((x,i)=>{ html+=renderCard(x.f,x.matched,rankNames[i],i+1,s); });
+    ranked.forEach((x,i)=>{ html+=renderCard(x.f,x.matched,rankNames[i],i+1,s,false); });
     if(ranked.filter(x=>x.f.flags.kanzo).length>=2)
       html+=`<div class="warnbox warn"><b>甘草重複注意：</b>上記候補のうち複数が甘草を含みます。併用する場合は甘草の合計量（目安：1日2.5g以下が安全域）に注意してください。</div>`;
   }
   if(nSel<3||ranked.length<2||ranked.length===0){
-    const qs=FOLLOWUP.filter(fu=>{
-      if(fu.sexOnly&&s.sex&&s.sex!==fu.sexOnly)return false;
-      return !fu.need.some(k=>s.checked[k]);
-    }).slice(0,6);
+    const qs=FOLLOWUP.filter(fu=>!fu.need.some(k=>s.checked[k])).slice(0,6);
     if(qs.length)html+=`<div class="askbox"><h3>追加で確認すると選びやすい項目</h3><ul>${qs.map(q=>`<li>${q.q}</li>`).join("")}</ul></div>`;
   }
   inner.innerHTML=html;
@@ -403,16 +521,33 @@ function showResult(){
   window.scrollTo({top:0});
 }
 
-function renderCard(f,matched,rankName,rank,s){
-  const {dangers,warns}=formulaWarnings(f,s);
-  const mchips=matched.map(k=>`<span class="mchip">${LABELS[k]||k}</span>`).join("");
-  const effs=(f.effects||[]).map(e=>`<span class="effchip">${e}</span>`).join(" ");
+/* section: [見出し, 中身HTML] を、openAll=true では静的ブロック、falseでは折りたたみで描画 */
+function detailSections(f){
   const herbs=(f.herbs||[]).map(h=>`<tr><td>${h[0]}</td><td>${h[1]}</td></tr>`).join("");
   const diffs=(f.diff||[]).map(d=>`<div class="diffitem"><b>${d[0]}との使い分け：</b>${d[1]}</div>`).join("");
+  return [
+    ["なぜ効くのか（漢方医学／現代医学）",
+      `<p style="margin-bottom:8px"><b>漢方医学的：</b>${f.kampo}</p><p><b>現代医学的：</b>${f.modern}</p>`],
+    ["構成生薬とその役割", `<table class="herbtable">${herbs}</table>`],
+    ["服用時の注意", `<p>${f.caution}</p>`],
+    ["副作用・禁忌", `<p>${f.adverse}</p>`],
+    ["類似処方との使い分け", diffs||"<p>—</p>"],
+    ["エビデンス", `<p>${f.evidence}</p>`]
+  ];
+}
+function renderCard(f,matched,rankName,rank,s,openAll){
+  const {dangers,warns}=formulaWarnings(f,s);
+  const mchips=matched.map(k=>`<span class="mchip${KAMPO_KEYS.has(k)?' kampo':''}">${LABELS[k]||k}</span>`).join("");
+  const effs=(f.effects||[]).map(e=>`<span class="effchip">${e}</span>`).join(" ");
   const badge=rankName?`<span class="rankbadge">${rankName}</span>`:"";
   const reasonSec=rank>0
     ?`<div class="sec"><h3>この薬を選択した理由</h3><div class="matchchips">${mchips}</div><p>${f.fit}</p></div>`
     :`<div class="sec"><h3>適応の目安</h3><p>${f.fit}</p></div>`;
+  const secs=detailSections(f).map(([title,body])=>
+    openAll
+      ? `<div class="block"><h4>${title}</h4><div class="dbody">${body}</div></div>`
+      : `<details><summary>${title}</summary><div class="dbody">${body}</div></details>`
+  ).join("");
   return `<div class="rescard rank${rank}">
     <div class="reshead">
       ${badge}
@@ -424,15 +559,7 @@ function renderCard(f,matched,rankName,rank,s){
       <div class="sec"><h3>期待できる効果</h3><p>${effs}</p></div>
       ${dangers.map(t=>`<div class="warnbox danger">⚠ ${t}</div>`).join("")}
       ${warns.map(t=>`<div class="warnbox warn">△ ${t}</div>`).join("")}
-      <details><summary>なぜ効くのか（漢方医学／現代医学）</summary><div class="dbody">
-        <p style="margin-bottom:8px"><b>漢方医学的：</b>${f.kampo}</p>
-        <p><b>現代医学的：</b>${f.modern}</p></div></details>
-      <details><summary>構成生薬とその役割</summary><div class="dbody">
-        <table class="herbtable">${herbs}</table></div></details>
-      <details><summary>服用時の注意</summary><div class="dbody"><p>${f.caution}</p></div></details>
-      <details><summary>副作用・禁忌</summary><div class="dbody"><p>${f.adverse}</p></div></details>
-      <details><summary>類似処方との使い分け</summary><div class="dbody">${diffs||"<p>—</p>"}</div></details>
-      <details><summary>エビデンス</summary><div class="dbody"><p>${f.evidence}</p></div></details>
+      ${secs}
     </div></div>`;
 }
 
@@ -448,8 +575,9 @@ function switchTab(t){
     document.getElementById("result").style.display="none";
     renderCatBar(); renderList();
   }else{
-    if(document.getElementById("resultInner").innerHTML && document.getElementById("result").style.display==="block"){}
-    else{ document.getElementById("inputView").style.display="block"; }
+    if(!(document.getElementById("resultInner").innerHTML && document.getElementById("result").style.display==="block")){
+      document.getElementById("inputView").style.display="block";
+    }
   }
 }
 function renderCatBar(){
@@ -474,9 +602,17 @@ function renderList(){
 function showListDetail(id){
   const f=FORMULAS.find(x=>x.id===id); if(!f)return;
   const s=getState();
+  document.getElementById("listItems").style.display="none";
+  document.getElementById("listCount").style.display="none";
   document.getElementById("listDetail").innerHTML=
-    `<button class="backlink" onclick="document.getElementById('listDetail').innerHTML='';window.scrollTo({top:0})">← 一覧に戻る</button>`
-    +renderCard(f,[],null,0,s);
+    `<button class="backlink" onclick="closeListDetail()">← 一覧に戻る</button>`
+    +renderCard(f,[],null,0,s,true);   /* openAll=true：全項目を開かず表示 */
+  window.scrollTo({top:0});
+}
+function closeListDetail(){
+  document.getElementById("listDetail").innerHTML="";
+  document.getElementById("listItems").style.display="";
+  document.getElementById("listCount").style.display="";
   window.scrollTo({top:0});
 }
 
@@ -489,8 +625,10 @@ function resetAll(){
   document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
   document.querySelectorAll('input[name=sex]').forEach(c=>c.checked=false);
   document.getElementById("age").value="";document.getElementById("weight").value="";
-  updateCount(); switchTab('sym'); backToInput();
+  updateCount(); closeListDetail(); switchTab('sym'); backToInput();
 }
+
+applyPatternWeights();
 buildChips();
 
 if ('serviceWorker' in navigator) {
