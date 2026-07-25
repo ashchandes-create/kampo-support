@@ -30,9 +30,9 @@
          box-shadow:0 2px 6px rgba(0,0,0,.15);}
   header h1{font-size:18px;font-weight:700;letter-spacing:.02em}
   header p{font-size:11.5px;opacity:.85;margin-top:2px}
-  .tabs{display:flex;gap:4px;margin-top:8px}
-  .tabs button{background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px 8px 0 0;
-      padding:8px 16px;font-size:13.5px;font-weight:700;cursor:pointer;opacity:.75}
+  .tabs{display:flex;gap:3px;margin-top:8px}
+  .tabs button{flex:1;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px 8px 0 0;
+      padding:9px 6px;font-size:13px;font-weight:700;cursor:pointer;opacity:.75;text-align:center;white-space:nowrap}
   .tabs button.active{background:var(--bg);color:var(--accent-dark);opacity:1}
   main{max-width:860px;margin:0 auto;padding:14px 12px 20px}
 
@@ -177,6 +177,42 @@
   .nores{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;
          color:var(--sub);margin-bottom:16px;font-size:14px}
   footer{max-width:860px;margin:6px auto 0;padding:0 14px;font-size:11px;color:var(--sub);text-align:center}
+
+  /* 治療ガイド */
+  #guideView{display:none}
+  .guideintro{font-size:12.5px;color:#1f6b58;margin-bottom:14px;background:var(--c-find-bg);
+              border:1px solid #bfe0d5;border-radius:10px;padding:10px 12px}
+  .guideintro span{font-size:11px;opacity:.85}
+  .ggroup{margin-bottom:14px}
+  .gitems{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .gitem{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--card);
+    border:1.5px solid var(--line);border-left:4px solid var(--c-find);border-radius:10px;
+    padding:10px 12px;font-size:14px;font-weight:700;color:var(--text);text-align:left;min-height:54px;justify-content:center}
+  .gitem:active{background:var(--c-find-bg)}
+  .gcount{font-size:10.5px;font-weight:400;color:var(--sub)}
+  .gtitle{font-size:17px;color:#1f6b58;border-left:5px solid var(--c-find);padding-left:9px;margin:6px 0 12px}
+  .gtitle small{font-size:11.5px;color:var(--sub);font-weight:400;margin-left:8px}
+  .gtablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);
+    border-radius:10px;margin-bottom:14px}
+  .gtable{border-collapse:collapse;width:100%;min-width:520px;font-size:12.5px}
+  .gtable th,.gtable td{border:1px solid var(--line);vertical-align:top}
+  .gtable thead th{background:var(--c-find);color:#fff;padding:8px 6px;font-size:12px;text-align:center}
+  .gtable th.corner{background:#1f6b58;font-size:10.5px;white-space:nowrap}
+  .gtable th.bandlabel{background:var(--c-find-bg);color:#1f6b58;font-weight:700;padding:8px 6px;
+    white-space:nowrap;text-align:center;font-size:12px}
+  .gtable td{padding:6px;min-width:122px}
+  .gchip{display:block;width:100%;background:#fff;border:1.5px solid #cfe3db;border-radius:8px;
+    padding:7px 8px;margin-bottom:5px;font-size:13px;font-weight:700;color:#1f6b58;text-align:left;line-height:1.25}
+  .gchip:last-child{margin-bottom:0}
+  .gchip:active{background:var(--c-find-bg)}
+  .gchip small{display:block;font-size:10px;font-weight:400;color:var(--sub)}
+  .gpoints{background:#fbfcfe;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .gpoints h3{font-size:13.5px;color:#1f6b58;margin-bottom:6px}
+  .gpoints li{margin-left:1.2em;font-size:13px;margin-bottom:5px}
+  .gby{font-size:10.5px;color:var(--sub);margin-top:8px;text-align:right}
+  .gnote{background:var(--c-find-bg);border:1px solid #bfe0d5;border-radius:10px;padding:9px 12px;
+    font-size:13px;margin-bottom:10px;color:#1f6b58}
+
   @media (max-width:480px){ .chips{grid-template-columns:repeat(auto-fill,minmax(108px,1fr))}
     .chip .clab{font-size:12.5px} .chip .cdesc{font-size:9.5px} .searchrow{top:104px} }
 </style>
@@ -187,6 +223,7 @@
   <p>症状・所見から候補処方を最大3剤提示（医療従事者向け・選択補助ツール）</p>
   <div class="tabs">
     <button id="tabSym" class="active" onclick="switchTab('sym')">症状から選ぶ</button>
+    <button id="tabGuide" onclick="switchTab('guide')">治療ガイド</button>
     <button id="tabList" onclick="switchTab('list')">処方一覧</button>
   </div>
 </header>
@@ -240,6 +277,14 @@
   <p class="listcount" id="listCount"></p>
   <div id="listItems"></div>
 </div>
+
+<div id="guideView">
+  <div id="guideDetail"></div>
+  <div id="guideHome">
+    <p class="guideintro">疾患・症状を選ぶと、体力（虚実）× 症状カテゴリの早見マップを表示します。マップ内の処方をタップすると詳細が開きます。<br><span>出典：ツムラ「漢方治療ガイド」シリーズ（各分野の専門医監修）</span></p>
+    <div id="guideList"></div>
+  </div>
+</div>
 </main>
 
 <div class="bottombar"><div class="inner">
@@ -255,6 +300,7 @@
 <script src="data2.js"></script>
 <script src="data3.js"></script>
 <script src="data4.js"></script>
+<script src="guides.js"></script>
 <script>
 "use strict";
 
@@ -566,19 +612,72 @@ function renderCard(f,matched,rankName,rank,s,openAll){
 /* ============ 処方一覧 ============ */
 let curCat="すべて";
 function switchTab(t){
-  const isList=(t==='list');
-  document.getElementById("tabSym").classList.toggle("active",!isList);
-  document.getElementById("tabList").classList.toggle("active",isList);
-  document.getElementById("listView").style.display=isList?"block":"none";
-  if(isList){
+  document.getElementById("tabSym").classList.toggle("active",t==='sym');
+  document.getElementById("tabGuide").classList.toggle("active",t==='guide');
+  document.getElementById("tabList").classList.toggle("active",t==='list');
+  document.getElementById("listView").style.display = t==='list'?"block":"none";
+  document.getElementById("guideView").style.display = t==='guide'?"block":"none";
+  if(t==='list'){
     document.getElementById("inputView").style.display="none";
     document.getElementById("result").style.display="none";
     renderCatBar(); renderList();
+  }else if(t==='guide'){
+    document.getElementById("inputView").style.display="none";
+    document.getElementById("result").style.display="none";
+    renderGuideHome();
   }else{
     if(!(document.getElementById("resultInner").innerHTML && document.getElementById("result").style.display==="block")){
       document.getElementById("inputView").style.display="block";
     }
   }
+}
+
+/* ---- 治療ガイド ---- */
+const GUIDES = window.KAMPO_GUIDES || [];
+function guideByNo(no){ return FORMULAS.find(f=>f.no==="ツムラ"+no); }
+function renderGuideHome(){
+  document.getElementById("guideDetail").innerHTML="";
+  document.getElementById("guideHome").style.display="block";
+  const cats=[...new Set(GUIDES.map(g=>g.cat))];
+  document.getElementById("guideList").innerHTML=cats.map(c=>{
+    const items=GUIDES.filter(g=>g.cat===c).map(g=>
+      `<button class="gitem" onclick="showGuide('${g.id}')">${g.title}<span class="gcount">${g.items.length}処方</span></button>`).join("");
+    return `<div class="ggroup"><div class="grouplabel">${c}</div><div class="gitems">${items}</div></div>`;
+  }).join("");
+}
+function showGuide(id){
+  const g=GUIDES.find(x=>x.id===id); if(!g)return;
+  document.getElementById("guideHome").style.display="none";
+  const head=`<th class="corner">体力＼症状</th>`+g.cols.map(c=>`<th>${c}</th>`).join("");
+  const rows=g.bands.map(b=>{
+    const cells=g.cols.map(c=>{
+      const chips=g.items.filter(it=>it.band===b&&it.col===c).map(it=>{
+        const f=guideByNo(it.no); const nm=f?f.name:('No.'+it.no);
+        return `<button class="gchip" onclick="showGuideFormula(${it.no},'${id}')">${nm}<small>ツムラ${it.no}</small></button>`;
+      }).join("");
+      return `<td>${chips}</td>`;
+    }).join("");
+    return `<tr><th class="bandlabel">${b}</th>${cells}</tr>`;
+  }).join("");
+  const points=(g.points||[]).map(p=>`<li>${p}</li>`).join("");
+  document.getElementById("guideDetail").innerHTML=
+    `<button class="backlink" onclick="renderGuideHome();window.scrollTo({top:0})">← ガイド一覧に戻る</button>
+     <h2 class="gtitle">${g.title}<small>体力（虚実）× 症状カテゴリ</small></h2>
+     <div class="gtablewrap"><table class="gtable"><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div>
+     <div class="gpoints"><h3>漢方治療のポイント</h3><ul>${points}</ul><p class="gby">${g.by||''}</p></div>`;
+  window.scrollTo({top:0});
+}
+function showGuideFormula(no,guideId){
+  const f=guideByNo(no); if(!f)return;
+  const g=GUIDES.find(x=>x.id===guideId);
+  const it=g?g.items.find(x=>x.no===no):null;
+  const s=getState();
+  document.getElementById("guideHome").style.display="none";
+  const cap=(it&&it.note)?`<div class="gnote"><b>${g.title}での目安：</b>${it.note}</div>`:"";
+  document.getElementById("guideDetail").innerHTML=
+    `<button class="backlink" onclick="showGuide('${guideId}')">← ${g?g.title:''} のマップに戻る</button>`
+    +cap+renderCard(f,[],null,0,s,true);
+  window.scrollTo({top:0});
 }
 function renderCatBar(){
   const cats=["すべて",...new Set(FORMULAS.map(f=>f.cat).filter(Boolean))];
