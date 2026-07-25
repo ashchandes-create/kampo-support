@@ -264,9 +264,8 @@
   <h1>漢方外来サポート</h1>
   <p>症状・所見から候補処方を最大3剤提示（医療従事者向け・選択補助ツール）</p>
   <div class="tabs">
-    <button id="tabSym" class="active" onclick="switchTab('sym')">症状</button>
+    <button id="tabSym" class="active" onclick="switchTab('sym')">症状から選ぶ</button>
     <button id="tabGuide" onclick="switchTab('guide')">治療ガイド</button>
-    <button id="tabSho" onclick="switchTab('sho')">証一覧</button>
     <button id="tabList" onclick="switchTab('list')">処方一覧</button>
   </div>
 </header>
@@ -314,11 +313,15 @@
 </div>
 
 <div id="listView">
-  <div class="searchrow"><input type="search" id="searchBox" placeholder="処方名・かな・番号で検索（例：ごれい、107）" oninput="renderList()"></div>
-  <div class="catbar" id="catBar"></div>
   <div id="listDetail"></div>
-  <p class="listcount" id="listCount"></p>
-  <div id="listItems"></div>
+  <div id="listHome">
+    <div class="searchrow"><input type="search" id="searchBox" placeholder="処方名・かな・番号で検索（例：ごれい、107）" oninput="renderList()"></div>
+    <div class="catbar" id="catBar"></div>
+    <div class="shofilters" id="shoFilters"></div>
+    <details class="shoexp"><summary>気血水（きけつすい）とは — 病態と主な症状</summary><div id="shoExplain"></div></details>
+    <p class="listcount" id="listCount"></p>
+    <div class="gtablewrap"><table class="shotable" id="listTable"></table></div>
+  </div>
 </div>
 
 <div id="guideView">
@@ -326,17 +329,6 @@
   <div id="guideHome">
     <p class="guideintro">疾患・症状を選ぶと、体力（虚実）× 症状カテゴリの早見マップを表示します。マップ内の処方をタップすると詳細が開きます。<br><span>出典：ツムラ「漢方治療ガイド」シリーズ（各分野の専門医監修）</span></p>
     <div id="guideList"></div>
-  </div>
-</div>
-
-<div id="shoView">
-  <div id="shoDetail"></div>
-  <div id="shoHome">
-    <p class="guideintro">各処方を <b>陰陽・虚実・気血水</b> で分類した一覧表です。行をタップすると詳細が開きます。上のボタンで絞り込みできます。<br><span>出典：ツムラ「陰陽と漢方薬／虚実と漢方薬／気血水と漢方薬」</span></p>
-    <details class="shoexp"><summary>気血水（きけつすい）とは — 病態と主な症状</summary><div id="shoExplain"></div></details>
-    <div class="shofilters" id="shoFilters"></div>
-    <p class="listcount" id="shoCount"></p>
-    <div class="gtablewrap"><table class="shotable" id="shoTable"></table></div>
   </div>
 </div>
 </main>
@@ -670,23 +662,17 @@ let curCat="すべて";
 function switchTab(t){
   document.getElementById("tabSym").classList.toggle("active",t==='sym');
   document.getElementById("tabGuide").classList.toggle("active",t==='guide');
-  document.getElementById("tabSho").classList.toggle("active",t==='sho');
   document.getElementById("tabList").classList.toggle("active",t==='list');
   document.getElementById("listView").style.display = t==='list'?"block":"none";
   document.getElementById("guideView").style.display = t==='guide'?"block":"none";
-  document.getElementById("shoView").style.display = t==='sho'?"block":"none";
   if(t==='list'){
     document.getElementById("inputView").style.display="none";
     document.getElementById("result").style.display="none";
-    renderCatBar(); renderList();
+    renderListHome();
   }else if(t==='guide'){
     document.getElementById("inputView").style.display="none";
     document.getElementById("result").style.display="none";
     renderGuideHome();
-  }else if(t==='sho'){
-    document.getElementById("inputView").style.display="none";
-    document.getElementById("result").style.display="none";
-    renderShoHome();
   }else{
     if(!(document.getElementById("resultInner").innerHTML && document.getElementById("result").style.display==="block")){
       document.getElementById("inputView").style.display="block";
@@ -694,7 +680,7 @@ function switchTab(t){
   }
 }
 
-/* ---- 証一覧（陰陽・虚実・気血水） ---- */
+/* ---- 証プロファイル（陰陽・虚実・気血水） ---- */
 const SHO = window.KAMPO_SHO || {yin:[],jitsu:{},kbs:{},explain:[]};
 const JITSU_ORDER=["実証","中間〜実","中間","虚〜中間","虚証"];
 const JITSU_SHORT={"実証":"実","中間〜実":"中〜実","中間":"中間","虚〜中間":"虚〜中","虚証":"虚"};
@@ -715,61 +701,6 @@ function shoBadgesHTML(no){
     +`<span class="kjbadge">${p.kj}</span>`
     +(kbs?`&nbsp;<span class="bl">気血水</span>${kbs}`:`&nbsp;<span class="bl" style="color:#aab3bc">気血水：該当なし</span>`)
     +`</div>`;
-}
-let shoFilter={yy:"", kj:"", kb:""};
-function renderShoHome(){
-  document.getElementById("shoDetail").innerHTML="";
-  document.getElementById("shoHome").style.display="block";
-  // 説明表
-  document.getElementById("shoExplain").innerHTML=
-    `<table class="exptable"><tbody>`+
-    SHO.explain.map(([tag,grp,byo,sym])=>
-      `<tr><td class="ex-grp">${grp}</td><td class="ex-tag"><span class="kbadge ${tag}">${tag}</span></td><td>${byo}</td><td>${sym}</td></tr>`).join("")
-    +`</tbody></table>`;
-  renderShoFilters();
-  renderShoTable();
-}
-function renderShoFilters(){
-  const mk=(label,key,opts)=>{
-    const btns=opts.map(o=>`<button class="fbtn${shoFilter[key]===o.v?' active':''}" onclick="setShoFilter('${key}','${o.v}')">${o.l}</button>`).join("");
-    return `<div class="fgroup"><span class="flabel">${label}</span><button class="fbtn${shoFilter[key]===''?' active':''}" onclick="setShoFilter('${key}','')">全</button>${btns}</div>`;
-  };
-  document.getElementById("shoFilters").innerHTML=
-    mk("陰陽","yy",[{l:"陰",v:"陰"},{l:"陽",v:"陽"}])
-    +mk("虚実","kj",JITSU_ORDER.map(j=>({l:JITSU_SHORT[j],v:j})))
-    +mk("気血水","kb",Object.keys(SHO.kbs).map(k=>({l:k,v:k})));
-}
-function setShoFilter(key,val){ shoFilter[key]=(shoFilter[key]===val?"":val); renderShoFilters(); renderShoTable(); }
-function renderShoTable(){
-  const rows=FORMULAS.filter(f=>formulaNo(f)!==501).map(f=>{
-    const no=formulaNo(f); const p=shoProfile(no);
-    return {f,no,p};
-  }).filter(x=>x.p)
-    .filter(x=> (!shoFilter.yy || x.p.yy===shoFilter.yy)
-             && (!shoFilter.kj || x.p.kj===shoFilter.kj)
-             && (!shoFilter.kb || x.p.kbs.includes(shoFilter.kb)))
-    .sort((a,b)=>a.no-b.no);
-  document.getElementById("shoCount").textContent=rows.length+"処方";
-  const head=`<thead><tr><th>No.</th><th>処方名</th><th>陰陽</th><th>虚実</th><th>気血水</th></tr></thead>`;
-  const body=`<tbody>`+rows.map(x=>{
-    const kbs=x.p.kbs.map(k=>`<span class="kbadge ${k}">${k}</span>`).join(" ")||"—";
-    return `<tr onclick="showShoFormula(${x.no})">
-      <td class="no">${x.no}</td>
-      <td class="nm">${x.f.name}<small>${x.f.kana}</small></td>
-      <td><span class="ybadge ${x.p.yin?'yin':'yang'}">${x.p.yy}</span></td>
-      <td><span class="kjbadge">${JITSU_SHORT[x.p.kj]}</span></td>
-      <td>${kbs}</td></tr>`;
-  }).join("")+`</tbody>`;
-  document.getElementById("shoTable").innerHTML=head+body;
-}
-function showShoFormula(no){
-  const f=FORMULAS.find(x=>formulaNo(x)===no); if(!f)return;
-  const s=getState();
-  document.getElementById("shoHome").style.display="none";
-  document.getElementById("shoDetail").innerHTML=
-    `<button class="backlink" onclick="renderShoHome();window.scrollTo({top:0})">← 証一覧に戻る</button>`
-    +renderCard(f,[],null,0,s,true);
-  window.scrollTo({top:0});
 }
 
 /* ---- 治療ガイド ---- */
@@ -819,39 +750,66 @@ function showGuideFormula(no,guideId){
     +cap+renderCard(f,[],null,0,s,true);
   window.scrollTo({top:0});
 }
+let listSho={yy:"", kj:"", kb:""};
 function renderCatBar(){
   const cats=["すべて",...new Set(FORMULAS.map(f=>f.cat).filter(Boolean))];
   document.getElementById("catBar").innerHTML=cats.map(c=>
     `<button class="catbtn${c===curCat?' active':''}" onclick="curCat='${c}';renderCatBar();renderList()">${c}</button>`).join("");
 }
+function renderListFilters(){
+  const mk=(label,key,opts)=>{
+    const btns=opts.map(o=>`<button class="fbtn${listSho[key]===o.v?' active':''}" onclick="setListFilter('${key}','${o.v}')">${o.l}</button>`).join("");
+    return `<div class="fgroup"><span class="flabel">${label}</span><button class="fbtn${listSho[key]===''?' active':''}" onclick="setListFilter('${key}','')">全</button>${btns}</div>`;
+  };
+  document.getElementById("shoFilters").innerHTML=
+    mk("陰陽","yy",[{l:"陰",v:"陰"},{l:"陽",v:"陽"}])
+    +mk("虚実","kj",JITSU_ORDER.map(j=>({l:JITSU_SHORT[j],v:j})))
+    +mk("気血水","kb",Object.keys(SHO.kbs).map(k=>({l:k,v:k})));
+}
+function setListFilter(key,val){ listSho[key]=(listSho[key]===val?"":val); renderListFilters(); renderList(); }
 function normKana(t){return (t||"").replace(/[ァ-ン]/g,ch=>String.fromCharCode(ch.charCodeAt(0)-0x60));}
+function renderListHome(){
+  document.getElementById("listDetail").innerHTML="";
+  document.getElementById("listHome").style.display="block";
+  document.getElementById("shoExplain").innerHTML=
+    `<table class="exptable"><tbody>`+
+    SHO.explain.map(([tag,grp,byo,sym])=>
+      `<tr><td class="ex-grp">${grp}</td><td class="ex-tag"><span class="kbadge ${tag}">${tag}</span></td><td>${byo}</td><td>${sym}</td></tr>`).join("")
+    +`</tbody></table>`;
+  renderCatBar(); renderListFilters(); renderList();
+}
 function renderList(){
   const q=normKana(document.getElementById("searchBox").value.trim().toLowerCase());
-  const hits=FORMULAS.filter(f=>{
+  const rows=FORMULAS.filter(f=>{
     if(curCat!=="すべて"&&f.cat!==curCat)return false;
-    if(!q)return true;
-    return f.name.includes(q)||normKana(f.kana).includes(q)||f.no.replace("ツムラ","").includes(q)||(f.cat||"").includes(q);
-  });
-  document.getElementById("listCount").textContent=hits.length+"処方";
-  document.getElementById("listItems").innerHTML=hits.map(f=>
-    `<div class="listitem" onclick="showListDetail('${f.id}')">
-       <div><div class="li-name">${f.name}</div><div class="li-kana">${f.kana}</div></div>
-       <span class="li-cat">${f.cat||""}</span><span class="li-no">${f.no}</span></div>`).join("");
+    if(q && !(f.name.includes(q)||normKana(f.kana).includes(q)||f.no.replace("ツムラ","").includes(q)||(f.cat||"").includes(q))) return false;
+    const p=shoProfile(formulaNo(f));
+    if(listSho.yy && (!p||p.yy!==listSho.yy)) return false;
+    if(listSho.kj && (!p||p.kj!==listSho.kj)) return false;
+    if(listSho.kb && (!p||!p.kbs.includes(listSho.kb))) return false;
+    return true;
+  }).sort((a,b)=>formulaNo(a)-formulaNo(b));
+  document.getElementById("listCount").textContent=rows.length+"処方";
+  const head=`<thead><tr><th>No.</th><th>処方名</th><th>陰陽</th><th>虚実</th><th>気血水</th></tr></thead>`;
+  const body=`<tbody>`+rows.map(f=>{
+    const no=formulaNo(f); const p=shoProfile(no);
+    const yy=p?`<span class="ybadge ${p.yin?'yin':'yang'}">${p.yy}</span>`:"—";
+    const kj=p?`<span class="kjbadge">${JITSU_SHORT[p.kj]}</span>`:"—";
+    const kbs=(p&&p.kbs.length)?p.kbs.map(k=>`<span class="kbadge ${k}">${k}</span>`).join(" "):"—";
+    return `<tr onclick="showListDetail('${f.id}')">
+      <td class="no">${no||''}</td>
+      <td class="nm">${f.name}<small>${f.kana}${f.cat?' ・ '+f.cat:''}</small></td>
+      <td>${yy}</td><td>${kj}</td><td>${kbs}</td></tr>`;
+  }).join("")+`</tbody>`;
+  document.getElementById("listTable").innerHTML=head+body;
 }
 function showListDetail(id){
   const f=FORMULAS.find(x=>x.id===id); if(!f)return;
   const s=getState();
-  document.getElementById("listItems").style.display="none";
-  document.getElementById("listCount").style.display="none";
+  document.getElementById("listHome").style.display="none";
   document.getElementById("listDetail").innerHTML=
-    `<button class="backlink" onclick="closeListDetail()">← 一覧に戻る</button>`
+    `<button class="backlink" onclick="renderListHome();window.scrollTo({top:0})">← 一覧に戻る</button>`
     +renderCard(f,[],null,0,s,true);   /* openAll=true：全項目を開かず表示 */
-  window.scrollTo({top:0});
-}
-function closeListDetail(){
-  document.getElementById("listDetail").innerHTML="";
-  document.getElementById("listItems").style.display="";
-  document.getElementById("listCount").style.display="";
   window.scrollTo({top:0});
 }
 
@@ -864,7 +822,10 @@ function resetAll(){
   document.querySelectorAll('input[type=checkbox]').forEach(c=>c.checked=false);
   document.querySelectorAll('input[name=sex]').forEach(c=>c.checked=false);
   document.getElementById("age").value="";document.getElementById("weight").value="";
-  updateCount(); closeListDetail(); switchTab('sym'); backToInput();
+  curCat="すべて"; listSho={yy:"",kj:"",kb:""};
+  document.getElementById("searchBox").value="";
+  document.getElementById("listDetail").innerHTML="";
+  updateCount(); switchTab('sym'); backToInput();
 }
 
 applyPatternWeights();
