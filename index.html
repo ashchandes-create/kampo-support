@@ -32,7 +32,7 @@
   header p{font-size:11.5px;opacity:.85;margin-top:2px}
   .tabs{display:flex;gap:3px;margin-top:8px}
   .tabs button{flex:1;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px 8px 0 0;
-      padding:9px 6px;font-size:13px;font-weight:700;cursor:pointer;opacity:.75;text-align:center;white-space:nowrap}
+      padding:9px 4px;font-size:12.5px;font-weight:700;cursor:pointer;opacity:.75;text-align:center;white-space:nowrap}
   .tabs button.active{background:var(--bg);color:var(--accent-dark);opacity:1}
   main{max-width:860px;margin:0 auto;padding:14px 12px 20px}
 
@@ -213,6 +213,48 @@
   .gnote{background:var(--c-find-bg);border:1px solid #bfe0d5;border-radius:10px;padding:9px 12px;
     font-size:13px;margin-bottom:10px;color:#1f6b58}
 
+  /* 証一覧 */
+  #shoView{display:none}
+  .shoexp{border:1px solid var(--line);border-radius:10px;margin-bottom:12px;background:#fbfcfe}
+  .shoexp summary{padding:10px 12px;font-size:13.5px;font-weight:700;color:var(--accent-dark);cursor:pointer;
+    list-style:none;display:flex;align-items:center}
+  .shoexp summary::after{content:"＋";margin-left:auto;color:var(--sub)}
+  .shoexp[open] summary::after{content:"－"}
+  .exptable{width:100%;border-collapse:collapse;font-size:12.5px;margin:0 0 4px}
+  .exptable td{border:1px solid var(--line);padding:7px 8px;vertical-align:top}
+  .exptable .ex-tag{white-space:nowrap;font-weight:700}
+  .exptable .ex-grp{white-space:nowrap;color:var(--sub);font-size:11px}
+  .shofilters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+  .shofilters .fgroup{display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:5px 7px}
+  .shofilters .flabel{font-size:11px;color:var(--sub);font-weight:700;margin-right:2px}
+  .fbtn{font-size:12px;padding:4px 9px;border-radius:999px;border:1.5px solid var(--line);
+    background:#fff;color:var(--sub);font-weight:700;white-space:nowrap}
+  .fbtn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .shotable{border-collapse:collapse;width:100%;min-width:500px;font-size:12.5px}
+  .shotable th,.shotable td{border:1px solid var(--line);padding:6px 7px;text-align:center;white-space:nowrap}
+  .shotable thead th{background:var(--accent);color:#fff;position:sticky;top:0;font-size:11.5px}
+  .shotable tbody tr{cursor:pointer}
+  .shotable tbody tr:active{background:var(--accent-light)}
+  .shotable td.nm{text-align:left;font-weight:700;color:var(--text)}
+  .shotable td.nm small{display:block;font-weight:400;color:var(--sub);font-size:10px}
+  .shotable td.no{color:var(--sub);font-size:11px}
+  /* 証バッジ */
+  .ybadge,.kjbadge,.kbadge{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 8px;line-height:1.5}
+  .ybadge.yin{background:#e9e6f4;color:#5a4a86;border:1px solid #cfc6e6}
+  .ybadge.yang{background:#fdeaea;color:#b1443a;border:1px solid #f0c9c5}
+  .kjbadge{background:#eef1f4;color:#4a5a68;border:1px solid #d5dde4}
+  .kbadge{margin:1px 2px}
+  .kbadge.気虚{background:#eaf6ef;color:#1e7a4f;border:1px solid #bfe2cf}
+  .kbadge.気逆{background:#e8f3ee;color:#2e8b74;border:1px solid #bfe0d5}
+  .kbadge.気滞{background:#eef0f0;color:#5b6b66;border:1px solid #d3dbd8}
+  .kbadge.血虚{background:#fdeef2;color:#a94464;border:1px solid #f2ccd7}
+  .kbadge.瘀血{background:#f3e9ec;color:#7d4152;border:1px solid #dcc4cc}
+  .kbadge.水滞{background:#eaf0f8;color:#3a5b86;border:1px solid #c6d6ea}
+  .shobadges{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:2px 0 10px;
+    padding-bottom:10px;border-bottom:1px dashed var(--line)}
+  .shobadges .bl{font-size:10.5px;color:var(--sub);font-weight:700;margin-right:1px}
+
   @media (max-width:480px){ .chips{grid-template-columns:repeat(auto-fill,minmax(108px,1fr))}
     .chip .clab{font-size:12.5px} .chip .cdesc{font-size:9.5px} .searchrow{top:104px} }
 </style>
@@ -222,8 +264,9 @@
   <h1>漢方外来サポート</h1>
   <p>症状・所見から候補処方を最大3剤提示（医療従事者向け・選択補助ツール）</p>
   <div class="tabs">
-    <button id="tabSym" class="active" onclick="switchTab('sym')">症状から選ぶ</button>
+    <button id="tabSym" class="active" onclick="switchTab('sym')">症状</button>
     <button id="tabGuide" onclick="switchTab('guide')">治療ガイド</button>
+    <button id="tabSho" onclick="switchTab('sho')">証一覧</button>
     <button id="tabList" onclick="switchTab('list')">処方一覧</button>
   </div>
 </header>
@@ -285,6 +328,17 @@
     <div id="guideList"></div>
   </div>
 </div>
+
+<div id="shoView">
+  <div id="shoDetail"></div>
+  <div id="shoHome">
+    <p class="guideintro">各処方を <b>陰陽・虚実・気血水</b> で分類した一覧表です。行をタップすると詳細が開きます。上のボタンで絞り込みできます。<br><span>出典：ツムラ「陰陽と漢方薬／虚実と漢方薬／気血水と漢方薬」</span></p>
+    <details class="shoexp"><summary>気血水（きけつすい）とは — 病態と主な症状</summary><div id="shoExplain"></div></details>
+    <div class="shofilters" id="shoFilters"></div>
+    <p class="listcount" id="shoCount"></p>
+    <div class="gtablewrap"><table class="shotable" id="shoTable"></table></div>
+  </div>
+</div>
 </main>
 
 <div class="bottombar"><div class="inner">
@@ -301,6 +355,7 @@
 <script src="data3.js"></script>
 <script src="data4.js"></script>
 <script src="guides.js"></script>
+<script src="sho.js"></script>
 <script>
 "use strict";
 
@@ -601,6 +656,7 @@ function renderCard(f,matched,rankName,rank,s,openAll){
       <span class="fno">${f.no}<br><span class="fcat">${f.cat||""}</span></span>
     </div>
     <div class="resbody">
+      ${shoBadgesHTML(formulaNo(f))}
       ${reasonSec}
       <div class="sec"><h3>期待できる効果</h3><p>${effs}</p></div>
       ${dangers.map(t=>`<div class="warnbox danger">⚠ ${t}</div>`).join("")}
@@ -614,9 +670,11 @@ let curCat="すべて";
 function switchTab(t){
   document.getElementById("tabSym").classList.toggle("active",t==='sym');
   document.getElementById("tabGuide").classList.toggle("active",t==='guide');
+  document.getElementById("tabSho").classList.toggle("active",t==='sho');
   document.getElementById("tabList").classList.toggle("active",t==='list');
   document.getElementById("listView").style.display = t==='list'?"block":"none";
   document.getElementById("guideView").style.display = t==='guide'?"block":"none";
+  document.getElementById("shoView").style.display = t==='sho'?"block":"none";
   if(t==='list'){
     document.getElementById("inputView").style.display="none";
     document.getElementById("result").style.display="none";
@@ -625,11 +683,93 @@ function switchTab(t){
     document.getElementById("inputView").style.display="none";
     document.getElementById("result").style.display="none";
     renderGuideHome();
+  }else if(t==='sho'){
+    document.getElementById("inputView").style.display="none";
+    document.getElementById("result").style.display="none";
+    renderShoHome();
   }else{
     if(!(document.getElementById("resultInner").innerHTML && document.getElementById("result").style.display==="block")){
       document.getElementById("inputView").style.display="block";
     }
   }
+}
+
+/* ---- 証一覧（陰陽・虚実・気血水） ---- */
+const SHO = window.KAMPO_SHO || {yin:[],jitsu:{},kbs:{},explain:[]};
+const JITSU_ORDER=["実証","中間〜実","中間","虚〜中間","虚証"];
+const JITSU_SHORT={"実証":"実","中間〜実":"中〜実","中間":"中間","虚〜中間":"虚〜中","虚証":"虚"};
+function formulaNo(f){ return parseInt((f.no||"").replace("ツムラ",""),10); }
+function shoProfile(no){
+  if(isNaN(no)) return null;
+  const yin=SHO.yin.includes(no);
+  let kj="虚証";
+  for(const k in SHO.jitsu){ if(SHO.jitsu[k].includes(no)){kj=k;break;} }
+  const kbs=[]; for(const k in SHO.kbs){ if(SHO.kbs[k].includes(no))kbs.push(k); }
+  return {yin, yy:yin?"陰":"陽", kj, kbs};
+}
+function shoBadgesHTML(no){
+  const p=shoProfile(no); if(!p||no===501) return "";
+  const kbs=p.kbs.map(k=>`<span class="kbadge ${k}">${k}</span>`).join("");
+  return `<div class="shobadges"><span class="bl">証</span>`
+    +`<span class="ybadge ${p.yin?'yin':'yang'}">${p.yy}証</span>`
+    +`<span class="kjbadge">${p.kj}</span>`
+    +(kbs?`&nbsp;<span class="bl">気血水</span>${kbs}`:`&nbsp;<span class="bl" style="color:#aab3bc">気血水：該当なし</span>`)
+    +`</div>`;
+}
+let shoFilter={yy:"", kj:"", kb:""};
+function renderShoHome(){
+  document.getElementById("shoDetail").innerHTML="";
+  document.getElementById("shoHome").style.display="block";
+  // 説明表
+  document.getElementById("shoExplain").innerHTML=
+    `<table class="exptable"><tbody>`+
+    SHO.explain.map(([tag,grp,byo,sym])=>
+      `<tr><td class="ex-grp">${grp}</td><td class="ex-tag"><span class="kbadge ${tag}">${tag}</span></td><td>${byo}</td><td>${sym}</td></tr>`).join("")
+    +`</tbody></table>`;
+  renderShoFilters();
+  renderShoTable();
+}
+function renderShoFilters(){
+  const mk=(label,key,opts)=>{
+    const btns=opts.map(o=>`<button class="fbtn${shoFilter[key]===o.v?' active':''}" onclick="setShoFilter('${key}','${o.v}')">${o.l}</button>`).join("");
+    return `<div class="fgroup"><span class="flabel">${label}</span><button class="fbtn${shoFilter[key]===''?' active':''}" onclick="setShoFilter('${key}','')">全</button>${btns}</div>`;
+  };
+  document.getElementById("shoFilters").innerHTML=
+    mk("陰陽","yy",[{l:"陰",v:"陰"},{l:"陽",v:"陽"}])
+    +mk("虚実","kj",JITSU_ORDER.map(j=>({l:JITSU_SHORT[j],v:j})))
+    +mk("気血水","kb",Object.keys(SHO.kbs).map(k=>({l:k,v:k})));
+}
+function setShoFilter(key,val){ shoFilter[key]=(shoFilter[key]===val?"":val); renderShoFilters(); renderShoTable(); }
+function renderShoTable(){
+  const rows=FORMULAS.filter(f=>formulaNo(f)!==501).map(f=>{
+    const no=formulaNo(f); const p=shoProfile(no);
+    return {f,no,p};
+  }).filter(x=>x.p)
+    .filter(x=> (!shoFilter.yy || x.p.yy===shoFilter.yy)
+             && (!shoFilter.kj || x.p.kj===shoFilter.kj)
+             && (!shoFilter.kb || x.p.kbs.includes(shoFilter.kb)))
+    .sort((a,b)=>a.no-b.no);
+  document.getElementById("shoCount").textContent=rows.length+"処方";
+  const head=`<thead><tr><th>No.</th><th>処方名</th><th>陰陽</th><th>虚実</th><th>気血水</th></tr></thead>`;
+  const body=`<tbody>`+rows.map(x=>{
+    const kbs=x.p.kbs.map(k=>`<span class="kbadge ${k}">${k}</span>`).join(" ")||"—";
+    return `<tr onclick="showShoFormula(${x.no})">
+      <td class="no">${x.no}</td>
+      <td class="nm">${x.f.name}<small>${x.f.kana}</small></td>
+      <td><span class="ybadge ${x.p.yin?'yin':'yang'}">${x.p.yy}</span></td>
+      <td><span class="kjbadge">${JITSU_SHORT[x.p.kj]}</span></td>
+      <td>${kbs}</td></tr>`;
+  }).join("")+`</tbody>`;
+  document.getElementById("shoTable").innerHTML=head+body;
+}
+function showShoFormula(no){
+  const f=FORMULAS.find(x=>formulaNo(x)===no); if(!f)return;
+  const s=getState();
+  document.getElementById("shoHome").style.display="none";
+  document.getElementById("shoDetail").innerHTML=
+    `<button class="backlink" onclick="renderShoHome();window.scrollTo({top:0})">← 証一覧に戻る</button>`
+    +renderCard(f,[],null,0,s,true);
+  window.scrollTo({top:0});
 }
 
 /* ---- 治療ガイド ---- */
