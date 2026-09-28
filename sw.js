@@ -4,10 +4,10 @@
  *       その他（data*.js・アイコン等） → キャッシュ優先（オフライン対応）
  */
 
-const CACHE_NAME = 'kampo-support-v5';
+const CACHE_NAME = 'kampo-support-v6';
 const PRECACHE = [
   'index.html', 'manifest.json',
-  'data1.js', 'data2.js', 'data3.js', 'data4.js', 'guides.js', 'sho.js',
+  'data1.js', 'data2.js', 'data3.js', 'data4.js', 'guides.js', 'sho.js', 'fukushin.js',
   'icon-192.png', 'icon-512.png'
 ];
 
